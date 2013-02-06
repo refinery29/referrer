@@ -15,24 +15,24 @@ A simple library to parse and normalize referrers.
 Example
 ====
 
-var referrer = new Referrer(document);
-// checks ?utm_ params on current page, tracks referrer. 
-//Saves into cookies or local storage
+	var referrer = new Referrer(document);
+	// checks ?utm_ params on current page, tracks referrer. 
+	//Saves into cookies or local storage
 
-// Now you can query referrer
-if (referrer.was('email')) {
-	alert ('email lol')
-}
-// query known sites
-referrer.was('facebook');
-// query domains
-referrer.was('gizoogle.com');
-// query domains with multiple zones
-referrer.was('sales.co.uk');
+	// Now you can query referrer
+	if (referrer.was('email')) {
+		alert ('email lol')
+	}
+	// query known sites
+	referrer.was('facebook');
+	// query domains
+	referrer.was('gizoogle.com');
+	// query domains with multiple zones
+	referrer.was('sales.co.uk');
 
-// track hit explicitly
-referrer.push('http://google.com?q=something');
-// query referrer
-referrer.was('google') //true;
-referrer.was('google?q=something') //true;
-referrer.was('google?q=otherthing') //false;
+	// track hit explicitly
+	referrer.push('http://google.com?q=something');
+	// query referrer
+	referrer.was('google') //true;
+	referrer.was('google?q=something') //true;
+	referrer.was('google?q=otherthing') //false;
