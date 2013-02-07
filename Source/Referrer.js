@@ -42,7 +42,7 @@ Referrer.prototype.write = function(key, value) {
 	if (window.localStorage) {
 		window.localStorage.setItem(this._key, value);
 	} else {
-		document.cookie = key + '=' + value;
+		document.cookie = key + '=' + value ';expires=' + (new Date(+new Date + 365 * 60 * 60 * 24)).toGMTString();
 	}
 };
 
