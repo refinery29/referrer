@@ -42,7 +42,7 @@ Referrer.prototype.write = function(key, value) {
 	if (window.localStorage) {
 		window.localStorage.setItem(this._key, value);
 	} else {
-		document.cookie = key + '=' + value ';expires=' + (new Date(+new Date + 365 * 60 * 60 * 24)).toGMTString();
+		document.cookie = key + '=' + value + ';expires=' + (new Date(+new Date + 365 * 60 * 60 * 24)).toGMTString();
 	}
 };
 
@@ -223,7 +223,12 @@ Referrer.prototype.equal = function(object, needle) {
 		var bits = needle.query.split('&');
 		for (var i = 0, j = bits.length; i < j; i++) {
 			var parts = bits[i].split('=');
-			if (parsed[parts[0]] != parts[1])
+			var val = parts[1];
+			if (val.indexOf('*') > -1) {
+				val = val.replace('*', '.*');
+				if (!new RegExp(val, 'ig').exec(parsed[parts[0]]))
+					return false;
+			} else if (parsed[parts[0]] != val)
 				return false;
 		}
 	}

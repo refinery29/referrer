@@ -118,6 +118,8 @@ describe('when user comes from email', function() {
 			expect(referrer.was('google?q=a%26b%3Fc%3Dd')).toBe(true);
 			expect(referrer.was('google?q=a&b?c=d')).toBe(false);
 			expect(referrer.was('google?q=носки')).toBe(true);
+			expect(referrer.was('google?q=н*и')).toBe(true);
+			expect(referrer.was('google?q=н*ц')).toBe(false);
 			expect(referrer.was('google?q=носки драные')).toBe(false);
 			expect(referrer.was('google?q=%D0%BD%D0%BE%D1%81%D0%BA%D0%B8')).toBe(true);
 			expect(referrer.was('google?q=носки')).toBe(true);
@@ -133,6 +135,8 @@ describe('when user comes from email', function() {
 			expect(referrer.was('sales.com')).toBe(false);
 			expect(referrer.was('google')).toBe(true);
 			expect(referrer.was('google?q=something')).toBe(true);
+			expect(referrer.was('google?q=*thing')).toBe(true);
+			expect(referrer.was('google?q=*thong')).toBe(false);
 			expect(referrer.was('google?q=other')).toBe(false);
 			expect(referrer.was('bing')).toBe(false)
 			expect(referrer.was('pinterest/somebody')).toBe(true)
