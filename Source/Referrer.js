@@ -225,7 +225,9 @@ Referrer.prototype.equal = function(object, needle) {
 			var parts = bits[i].split('=');
 			var val = parts[1];
 			if (val.indexOf('*') > -1) {
-				val = val.replace('*', '.*');
+				val = decodeURI(val).replace(/\*/g, '.*').replace(/[^\[\]\(\)\*\{\}]+/g, function(value) {
+					return encodeURI(value);
+				})
 				if (!new RegExp(val, 'ig').exec(parsed[parts[0]]))
 					return false;
 			} else if (parsed[parts[0]] != val)

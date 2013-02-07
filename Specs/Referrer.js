@@ -1,12 +1,18 @@
 if (typeof describe == 'undefined') {
 	var stack = [];
 	var current;
+	var attempt = function(condition, value, type) {
+		if (condition)
+			console.log(stack.join(' '))
+		else
+			console.error(stack.join(' '), ['Expected', value, 'to ' + type, current])
+	}
 	var matchers = {
 		toBe: function(value) {
-			console[current === value ? 'log' : 'error'](stack.join(' '), '(Expected identity)', [current, value]);
+			attempt(current === value, value, 'be');
 		},
 		toEqual: function(a, b) {
-			console[current == value ? 'log' : 'error'](stack.join(' '), '(Expected equality)', [current, value]);
+			attempt(current == value, value, 'equal');
 		}
 	}
 	describe = it = function(title, callback) {
@@ -137,6 +143,7 @@ describe('when user comes from email', function() {
 			expect(referrer.was('google?q=something')).toBe(true);
 			expect(referrer.was('google?q=*thing')).toBe(true);
 			expect(referrer.was('google?q=*thong')).toBe(false);
+			expect(referrer.was('google?q=*th[oi]ng')).toBe(true);
 			expect(referrer.was('google?q=other')).toBe(false);
 			expect(referrer.was('bing')).toBe(false)
 			expect(referrer.was('pinterest/somebody')).toBe(true)
