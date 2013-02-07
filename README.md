@@ -39,7 +39,9 @@ Example
 	referrer.was('google?q=otherthing') //false;
 
 	// query parameters with wildcars
-	referrer.was('google?q=some*') 
+	referrer.was('google?q=some*')
+	// query parameters with regexes 
+	referrer.was('google?q=*some(one|body)*')
 
 	// query url encoded parameters
 	referrer.was('http://google.com?q=exposé')
