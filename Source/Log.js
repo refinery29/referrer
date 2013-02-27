@@ -1,15 +1,10 @@
-R29.Log = function(prefix, limit, unique, adapter, separator) {
-  if (typeof prefix == 'object') {
-    for (var property in prefix)
-      this[property] = prefix[property];
-  } else {
-    if (prefix)
-      this.prefix = prefix;
-    if (adapter)
-      this.adapter = adapter;
-    if (separator)
-      this.separator = separator;
+R29.Log = function(options) {
+  if (typeof options == 'object') {
+    for (var property in options)
+      this[property] = options[property];
   }
+  if (this.storage && this.key)
+    this.fromString(this.storage.getItem(this.key));
   if (this.string) this.fromString(this.string);
   // this.storage = new R29.Storage(this.prefix, this.adapter);
 };
@@ -64,6 +59,8 @@ R29.Log.prototype.push = function() {
   }
   if (this.onChange)
     this.onChange.apply(this, arguments)
+  if (this.storage && this.key)
+    this.storage.setItem(this.key, this.toString());
   if (this.writable) this.write();
   return this.length;
 };
@@ -75,6 +72,10 @@ R29.Log.prototype.indexOf = function(object, lastIndex, location) {
       return i;
   }
   return -1;
+};
+
+R29.Log.prototype.contains = function(object) {
+  return this.indexOf(object, undefined, false) > -1
 };
 
 !function(proto) {

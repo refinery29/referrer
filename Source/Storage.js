@@ -37,7 +37,15 @@ R29.Storage = function(key, value, old, meta, prefix, storage, get, self, length
     }
     return !initial ? constructor : R29.Storage.initialize(constructor, true, key, value);
   }
-  if (!storage) storage = 'Local';
+  if (!storage) 
+    if (R29.Storage.Local.prototype.adapter)
+      storage = 'Local';
+    else if (R29.Storage.Indexed && R29.Storage.Indexed.prototype.database)
+      storage = 'Indexed';
+    else if (R29.Storage.Cookies)
+      storage = 'Cookies';
+    else
+      storage = 'Session';
   if (typeof storage == 'string') 
     storage = R29.Storage[storage].prototype;
   var prototype = this.prototype;

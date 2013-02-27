@@ -1,9 +1,15 @@
-R29.Session = function() {
+R29.Events = function() {
   return R29.Log.apply(this, arguments)
 }
 
-R29.Session.prototype = new R29.Log;
-R29.Session.prototype.onCast = function(object) {
+R29.Events.prototype = new R29.Log;
+!function(proto) {
+  for (var property in proto)
+    if (!R29.Events.prototype[property])
+      R29.Events.prototype[property] = proto[property];
+}(R29.Console.prototype);
+R29.Events.prototype.key = 'locations';
+R29.Events.prototype.onCast = function(object) {
   switch (typeof object) {
     case 'object':
       switch (object.nodeType) {

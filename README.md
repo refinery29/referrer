@@ -17,78 +17,78 @@ A simple library to parse and normalize R29.Referrers.
     R29.Referrers.push('http://google.com?q=something');
 
     // Now you can query R29.Referrers
-    if (R29.Referrers.was('email'))
+    if (R29.Referrers.contains('email'))
       alert ('email lol')
 
     // query known sites
-    R29.Referrers.was('facebook');
+    R29.Referrers.contains('facebook');
     // query domains
-    R29.Referrers.was('gizoogle.com');
+    R29.Referrers.contains('gizoogle.com');
     // query domains with multiple zones
-    R29.Referrers.was('sales.co.uk');
+    R29.Referrers.contains('sales.co.uk');
 
     // query known R29.Referrers with parameter
-    R29.Referrers.was('google') //true;
-    R29.Referrers.was('google?q=something') //true;
-    R29.Referrers.was('google?q=otherthing') //false;
+    R29.Referrers.contains('google') //true;
+    R29.Referrers.contains('google?q=something') //true;
+    R29.Referrers.contains('google?q=otherthing') //false;
 
     // query parameters with wildcars
-    R29.Referrers.was('google?q=some*')
+    R29.Referrers.contains('google?q=some*')
     // query parameters with regexes 
-    R29.Referrers.was('google?q=*some(one|body)*')
+    R29.Referrers.contains('google?q=*some(one|body)*')
 
     // query url encoded parameters
-    R29.Referrers.was('http://google.com?q=exposé')
-    R29.Referrers.was('http://google.com?q=expos%C3%A9')
+    R29.Referrers.contains('http://google.com?q=exposé')
+    R29.Referrers.contains('http://google.com?q=expos%C3%A9')
 
     // query main page
-    R29.Referrers.was('reddit/')
+    R29.Referrers.contains('reddit/')
 
     // query known websites directories
     // there're per-site settings for max. deepness to keep
     // and also exceptions list to avoid saving specific paths 
-    R29.Referrers.was('pinterest/somebody')
-    R29.Referrers.was('reddit/r/something')
+    R29.Referrers.contains('pinterest/somebody')
+    R29.Referrers.contains('reddit/r/something')
 
 
-Session
+Events
 ===
 
-Session is a temporary history of all events and visited pages by a single user. Implements analytics hooks, allows query 
+Events is a temporary history of visited pages and events triggered by a single user. Implements analytics hooks, allows query 
 
 
-    var session = new R29.Session;
+    var events = new R29.Events;
 
     // log currently loaded page
-    session.push(document);
+    events.push(document);
 
     // log a page hit, /beauty
-    session.push('/beauty')
+    events.push('/beauty')
 
     // log an internal page hit, /beauty/slideshow
-    session.push('#slideshow')
+    events.push('#slideshow')
 
 
     // implement GA event hook
-    session.onPush = function(arg) {
+    events.onPush = function(arg) {
       if (arg.push) //array was given, treat it as event
         _gaq.push(['_trackEvent'].concat(arg))
     }
 
     // log an event
-    session.push(['slideshow', 'slide', 5, true])
+    events.push(['slideshow', 'slide', 5, true])
 
     // console-compatible API
-    session.log('hello workd');
+    events.log('hello workd');
 
-    session.time('page load');
+    events.time('page load');
     window.onload = function() {
-      session.timeEnd('page load')
+      events.timeEnd('page load')
     }
     
-    // query session for values
-    session.indexOf('/beauty') //0, user was on /beauty page
-    session.indexOf('/ugliness') //-1, user was not on /ugliness page
+    // query events for values
+    events.indexOf('/beauty') //0, user was on /beauty page
+    events.indexOf('/ugliness') //-1, user was not on /ugliness page
     
     
 
@@ -118,7 +118,7 @@ A powerful object with multiple adapters (Cookies, localStorage, sessionStorage,
     // populate a native array with values from cookies
     R29.Storage([]) 
    
-    // create a localSession-compatible storage with prefix
+    // create a localStorage-compatible storage with prefix
     var storage = new R29.Storage('clients');
     storage.getItem('somethng', function(value) {})
 

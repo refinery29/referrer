@@ -93,7 +93,7 @@ describe('R29.Log', function() {
         unique: true
       })
       log.push(1, 2);
-      expect(log.slice()).toEqual([ ]);
+      expect(log.slice()).toEqual([1, 2]);
       log.push(2, 3);
       expect(log.slice()).toEqual([1, 2, 3])
       log.push(1, 2, 3);
