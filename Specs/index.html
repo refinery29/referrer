@@ -1,3 +1,31 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-<script src="../Source/Referrer.js"></script>
-<script src="Referrer.js"></script>
+<script src="../Source/R29.js"></script>
+<script src="../Source/URI.js"></script>
+<script src="../Source/Storage.js"></script>
+<script src="../Source/Storage.Indexed.js"></script>
+<script src="../Source/Storage.Cookies.js"></script>
+<script src="../Source/Log.js"></script>
+<script src="../Source/Referrers.js"></script>
+<link rel="stylesheet" href="http://pivotal.github.com/jasmine/lib/jasmine.css">
+<script src="http://pivotal.github.com/jasmine/lib/jasmine.js"></script>
+<script src="http://pivotal.github.com/jasmine/lib/jasmine-html.js"></script>
+<script src="Referrers.js"></script>
+<script src="Log.js"></script>
+<script src="Storage.js"></script>
+<script>
+(function() {
+  var jasmineEnv = jasmine.getEnv();
+  jasmineEnv.updateInterval = 250;
+
+  var htmlReporter = new jasmine.HtmlReporter();
+  jasmineEnv.addReporter(htmlReporter);
+
+  jasmineEnv.specFilter = function(spec) {
+    return htmlReporter.specFilter(spec);
+  };
+
+  window.onload = function() {
+    jasmineEnv.execute();
+  }
+})();
+</script>
