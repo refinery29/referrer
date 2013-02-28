@@ -43,27 +43,29 @@ R29.Referrers.prototype.normalize = function(object, location) {
 	}
 	if (params) {
 		if (location === false) {
-			if (object.directory) 
+			if (object.directory != null) 
 				normalized.directory = this.encode(object.directory);
 			if (object.file)
 				normalized.file = this.encode(object.file);
 		} else {
+			var path = (object.directory || '')
+			if (object.file) {
+				if (path) path += '/'
+				path += object.file
+			}
 			params: for (var i = 0, j = params.length; i < j; i++) {
 				var value = params[i];
 				switch (typeof value) {
 					case 'number':
-						var path = (object.directory || '/') + (object.file || '');
 						var bits = path.split('/');
-						bits.shift();
-						for (var k = 0; k < value; k++)
-							if (bits[k])
-								normalized.directory = (normalized.directory || '/') + this.encode(bits[k]);
-						if (bits[k + 1])
-							normalized.file = this.encode(bits[k + 1]);
+						for (var k = 0; k < Math.min(bits.length, value); k++)
+							if (k + 1 == value)
+								normalized.file = this.encode(bits[k]);
+							else if (bits[k])
+								normalized.directory = (normalized.directory || '') + (k ? '/' : '') + this.encode(bits[k]);
 						break;
 					case 'object':
 						if (value.push && (object.directory || object.file)) {
-							var path = (object.directory ? object.directory.substring(1) : '') + (object.file || '');
 							for (var k = 0, l = value.length; k < l; k++) {
 								var p = value[k];
 								if (path.substring(0, p.length) == p 
@@ -144,7 +146,7 @@ R29.Referrers.prototype.equal = function(object, needle) {
 	var path = (object.directory ? object.directory : '') + (object.file || '');
 	if (needle.directory != null || needle.file)
 		if (p === '' && needle.directory != null
-			? path !== '' || path === '/'
+			? path !== '' || object.directory == null
 			: path === '' ? p != '/' : (path.substring(0, p.length) != p)
 				|| (p.length != path.length && path.charAt(p.length) != '/'))
 		return false;

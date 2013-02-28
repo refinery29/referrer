@@ -19,5 +19,7 @@ R29.Events.prototype.onCast = function(object) {
         case 1:
           return R29.URI(object.getAttribute('href') || object.getAttribute('action') || object.getAttribute('src'))
       }
+      if (object.location)
+        return R29.URI(String(object.location));
   }
 }

@@ -15,10 +15,10 @@ R29.Document = function(document) {
   // initialize console
   this.console = new R29.Console;
   // parse current URL
-  this.location = R29.URI(document.location);
+  this.location = new R29.URI(String(document.location));
   // parse referrer URL
   if (document.referrer)
-    this.referrer = R29.URI(document.referrer);
+    this.referrer = new R29.URI(String(document.referrer));
   // register current location
   this.events.push(this);
   // register current referrer
@@ -26,3 +26,9 @@ R29.Document = function(document) {
 };
 
 R29.document = new R29.Document(document);
+
+R29 = (function() {
+  for (var property in R29) 
+    R29.document[property] = R29[property];
+  return R29.document;
+})();

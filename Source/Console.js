@@ -4,7 +4,7 @@ R29.Console = function() {
 R29.Console.prototype = new R29.Log;
 R29.Console.prototype.adapter = window.console;
 R29.Console.prototype.onPush = function(args) {
-  if (!this.adapter) return;
+  if (!this.adapter || !args || !args.push) return;
   var type = args[0];
   if (!this.adapter[type])
     type = 'log';
