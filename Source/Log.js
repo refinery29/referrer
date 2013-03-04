@@ -32,7 +32,7 @@ R29.Log.prototype.concat = function() {
 };
 
 
-R29.Log.prototype.toString = function(object) {
+R29.Log.prototype.toString = function() {
   return this.join(this.joiner || this.separator)
 };
 
@@ -76,6 +76,14 @@ R29.Log.prototype.indexOf = function(object, lastIndex, location) {
 
 R29.Log.prototype.contains = function(object) {
   return this.indexOf(object, undefined, false) > -1
+};
+
+R29.Log.prototype.reset = function() {
+  for (var i = 0; i < this.length; i++)
+    delete this[i];
+  this.length = 0;
+  if (this.onChange)
+    this.onChange();
 };
 
 !function(proto) {

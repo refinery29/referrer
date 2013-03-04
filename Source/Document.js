@@ -25,6 +25,11 @@ R29.Document = function(document) {
   this.referrers.push(this);
 };
 
+R29.Document.prototype.reset = function() {
+  this.events.reset();
+  this.referrers.reset();
+};
+
 R29.document = new R29.Document(document);
 
 R29 = (function() {

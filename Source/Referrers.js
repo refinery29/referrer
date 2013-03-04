@@ -8,7 +8,7 @@ R29.Referrers.prototype.unique = true;
 R29.Referrers.prototype.separator = '|';
 
 R29.Referrers.prototype.onCast = function(object, location) {
-	if (!object) return;8
+	if (!object) return;
 	if (object.location)
 		this.push(this.normalize(String(object.location), true));
 	if (typeof object != 'string') {
