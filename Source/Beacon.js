@@ -1,23 +1,14 @@
 R29.Beacon = function(name, options) {
   R29.Beacon[name] = this;
   this.name = name;
-  if (options)
-    this.setOptions(options);
-  if (this.onInitialize)
-    this.onInitialize();
-  if (this.isEager() || R29.Beacon.loaded)
-    this.load();
+  R29.Script.call(this, options)
 };
 
-R29.Beacon.prototype.setOptions = function(options) {
-  if (options)
-    for (var name in options)
-      this[name] = options[name];
-};
+R29.Beacon.prototype = new R29.Script;
 
 R29.Beacon.prototype.applicable = true;
-R29.Beacon.prototype.lazy = true;
-R29.Beacon.prototype.deferred = true;
+R29.Beacon.prototype.immediate = false;
+R29.Beacon.prototype.eager = false;
 
 R29.Beacon.initialize = function(options) {
   if (!this.queueing)
@@ -64,48 +55,20 @@ R29.Beacon.prototype.getDomain = function() {
   return domain;
 }
 
-R29.Beacon.prototype.load = function() {
-  if (this.isLoaded()) {
-    if (!this.loaded && this.onLoad)
-      this.onLoad();
-    return;
-  }
-  var src = this.getURL && this.getURL() || this.src || this[location.protocol] || this.http;
-  if (src) {
-    if (!this.script) return;
-    var script = this.script = document.createElement('script');
-    var thus = this;
-    if (this.onBeforeLoad)
-      this.onBeforeLoad(src, script);
-    script.onload = function(event) {
-      thus.loaded = true;
-      if (thus.onLoad)
-        thus.onLoad(event)
-    }
-    script.onerror = function(event) {
-      if (this.onError)
-        thus.onError(event)
-    }
-    script.src = src;
-    document.appendChild(script)
-  }
-};
-
-R29.Beacon.prototype.isEager = function() {
-  return this.eager;
-};
-
-R29.Beacon.prototype.isDeferred = function() {
-  return this.deferred;
-};
-
-R29.Beacon.prototype.isLoaded = function() {
-  return this.loaded;
+R29.Beacon.prototype.isImmediate = function() {
+  return this.immediate;
 };
 
 R29.Beacon.prototype.isApplicable = function() {
   return this.applicable;
 };
+/*
+Example config: 
+
+  * Loads multiple beacons
+  * Sets up the configuration
+  * Checks if they were loaded before or bundled
+  * Executes callbacks
 
 R29.Beacon.initialize({
   Buzzfeed: {},
@@ -133,3 +96,4 @@ R29.Beacon.initialize({
   },
   Woopra: {}
 })
+*/
