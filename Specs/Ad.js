@@ -39,7 +39,8 @@ describe('R29.Ad', function() {
     expect(window._gaq).toBe(undefined);
     var finished = false;
     ad.evaluate(function() {
-      expect(window._gat).toBeDefined()
+      finished = true;
+      if (!window._gat) throw "GA is not initialized. Why?"
     }, fragment);
     waitsFor(function() {
       return window._gat != null;
@@ -54,19 +55,27 @@ describe('R29.Ad', function() {
   it ('should execute scripts that document.write() async scripts', function() {
     var ad = new R29.Ad;
     ad.capture();
-    document.write('123<script>document.write("<script src=\\"http://google-analytics.com/ga.js\\"></sc" + "ript>")</script>')
+    document.write('123<script>document.write("<script src=\\"http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js\\"></sc" + "ript>")</script>')
     document.write('321')
-    expect(window._gat).toBeUndefined()
+    expect(window.jQuery).toBeUndefined()
+    var finished;
     ad.evaluate(function() {
-      expect(window._gat).toBeDefined()
-      delete window._gat
+      finished = true;
     });
     expect(ad[0].textContent).toBe('123')
     expect(ad[1].tagName).toBe('SCRIPT')
     expect(ad[1].getAttribute('src')).toBe(null);
     expect(ad[2].tagName).toBe('SCRIPT')
-    expect(ad[2].getAttribute('src')).toBe('http://google-analytics.com/ga.js');
+    expect(ad[2].getAttribute('src')).toBe('http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js');
     expect(ad[3].textContent).toBe('321')
+    waitsFor(function() {
+      return finished;
+    })
+    runs(function() {
+      expect(window.jQuery).toBeDefined()
+      delete window.jQuery
+      delete window.$
+    })
   })
 
   it ('should execute scripts that document.write() async scripts that document.write() content', function() {
