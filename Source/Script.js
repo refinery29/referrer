@@ -7,6 +7,8 @@ R29.Script = function(options) {
     this.load();
 };
 
+R29.Script.prototype.groups = {};
+
 R29.Script.prototype.setOptions = function(options) {
   if (options)
     for (var name in options)
@@ -17,41 +19,76 @@ R29.Script.prototype.isEager = function() {
   return this.eager;
 };
 
-R29.Script.prototype.isLoaded = function() {
-  return this.loaded;
+R29.Script.prototype.isLoaded = function(src) {
+  return this.loaded == src;
 };
 
-R29.Script.prototype.load = function() {
-  if (this.isLoaded()) {
+R29.Script.prototype.load = function(src, onComplete, onStart) {
+  if (!src)
+    src = this.getURL && this.getURL() || this.src || this[location.protocol] || this.http;
+  if (this.isLoaded(src)) {
     if (!this.loaded) {
-      if (this.onBeforeLoad)
-        this.onBeforeLoad()
-      if (this.onPreload)
-        this.onPreload();
-      if (this.onLoad)
-        this.onLoad();
+      this.loaded = src;
+      if (this.onCache)
+        this.onCache();
+      if (this.onComplete)
+        this.onComplete();
+      if (this.onSuccess)
+        this.onSuccess()
+      if (onComplete)
+        onComplete.call(this);
     }
     return;
   }
-  var src = this.getURL && this.getURL() || this.src || this[location.protocol] || this.http;
-  if (src) {
-    if (!this.script) return;
-    var script = this.script = document.createElement('script');
-    var thus = this;
-    if (this.onFetch)
-      this.onFetch(src, script);
-    script.onload = function(event) {
-      thus.loaded = true;
-      if (thus.onBeforeLoad)
-        thus.onBeforeLoad(event);
-      if (thus.onLoad)
-        thus.onLoad(event)
-    }
-    script.onerror = function(event) {
+  if (!src || (this.script && this.script == src)) return;
+  var script = document.createElement('script');
+  if (!this.script) this.script = script;
+  var thus = this;
+  var group = this.group;
+  if (group)
+    var queue = (this.groups[group] || (this.groups[group] = []))
+  script.onload = script.onerror = function(event) {
+    thus.onFinish(event, queue, onComplete)
+  }
+  if (src.nodeType)
+    for (var i = 0, attribute; attribute = src.attributes[i++];)
+      script.setAttribute(attribute.name, attribute.value);
+  else
+    script.src = src;  
+  if (!queue || queue.push(script) == 1) {
+    if (onStart)
+      onStart.call(this);
+    document.body.appendChild(script)
+  } else if (onStart) {
+    script.onstart = onStart
+  }
+  return script;
+};
+
+R29.Script.prototype.onFinish = function(event, queue, onComplete) {
+  if (this.script == event.target) {
+    this.loaded = event.target.src;
+    if (this.onComplete)
+      this.onComplete(event);
+    if (event.type == 'error') {
       if (this.onError)
-        thus.onError(event)
+        this.onError(event)
+    } else {
+      if (this.onSuccess)
+        this.onSuccess(event);
     }
-    script.src = src;
-    document.appendChild(script)
+  }
+  if (onComplete)
+    onComplete.call(this, event);
+  if (queue) {
+    queue.shift();
+    var next = queue[0];
+    if (next) {
+      if (next.onstart) {
+        next.onstart.call(this);
+        delete next.onstart;
+      }
+      document.body.appendChild(next);
+    }
   }
 };
