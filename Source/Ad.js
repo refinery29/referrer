@@ -31,7 +31,6 @@ R29.Ad.prototype.capture = function(callback, stack, context) {
   var thus = this;
   var buffer = [];
   this.writers.push(document.write);
-  console.log('capture')
   document.write = function(string) {
     return thus.write(string, buffer);
   };
@@ -48,7 +47,6 @@ R29.Ad.prototype.capture = function(callback, stack, context) {
 // release and parse HTML contents written into a buffer
 R29.Ad.prototype.release = function(buffer, context, partial) {
   var parsed = this.parse(buffer, context, partial);
-  console.log('release', parsed)
   document.write = this.writers.pop();
   return parsed;
 };
@@ -116,11 +114,9 @@ R29.Ad.prototype.execute = function(node, stack, callback) {
   if (node.src) {
     // load or queue up a script if another ad is currently loading
     return this.load(node, function(event) {
-      console.log('oncopmplete', node.src)
       this.evaluate(callback, this, event.target, true);
     }, function() {
       // redefine document.write()
-      console.log('onstart', node.src)
       this.capture();
     })
   } else {
