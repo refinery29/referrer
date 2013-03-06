@@ -6,7 +6,6 @@ R29.Log = function(options) {
   if (this.storage && this.key)
     this.fromString(this.storage.getItem(this.key));
   if (this.string) this.fromString(this.string);
-  // this.storage = new R29.Storage(this.prefix, this.adapter);
 };
 R29.Log.prototype.length = 0;
 R29.Log.prototype.size = 0;

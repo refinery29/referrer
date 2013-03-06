@@ -50,6 +50,7 @@ R29.Script.prototype.load = function(src, onComplete, onStart) {
   script.onload = script.onerror = function(event) {
     thus.onFinish(event, queue, onComplete)
   }
+  script.type= 'text/javascript'
   if (src.nodeType)
     for (var i = 0, attribute; attribute = src.attributes[i++];)
       script.setAttribute(attribute.name, attribute.value);
