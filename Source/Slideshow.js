@@ -55,7 +55,9 @@ Slideshow = function(element, options) {
   }
   this.items[0].className += ' first';
   this.items[this.items.length - 1].className += ' last';
-  this.select(this.items[0], false);
+  this.select(this.items[0]);
+  this.onResize()
+  this.scrollTo(0)
 
   var self = this;
   this.hammer = hammer = new Hammer(document.body, {
@@ -287,7 +289,6 @@ Slideshow = function(element, options) {
     delete hammer.up;
     delete self.dragging;
   }
-  this.onResize()
 };
 Slideshow.prototype.previous = function() {
   this.select('previous');
@@ -505,6 +506,7 @@ Slideshow.prototype.placehold = function() {
     if (child) {
       this.placeheld.push(child);
       this.list.appendChild(child)
+  console.error('placehokding', width)
       width += this.offsetWidths[i] + this.gap;
       if (width + (i + 1) * this.gap >= this.offsetWidth)
         break;
@@ -614,22 +616,28 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     var max = scroll - this.offsetWidth;
     var offset = x.offsetLeft;
     var width = x.offsetWidth;
-    var left = offset - ((this.offsetWidth - width) / 2);
+    var left = offset - Math.round((this.offsetWidth - width) / 2);
     x = this.endless ? left : Math.round(Math.min(max, Math.max(left, 0)))
   }
   if (!smooth && this.endless) {
     var placeholding = this.scrollWidth - (this.placeholding || 0);
-    if (x > placeholding) {
-      x -= placeholding;
-    }
-    if (x < 0) {
+    console.log(x)
+    if (x <= 0) {
       this.placehold();
-      x += this.items[0].offsetLeft
-    } else if (x > this.scrollWidth - (this.placeholding || 0) - this.offsetWidth - window.innerWidth / 2) {
-      this.placehold()
-    } else if (this.placeheld) {
-      if (x < placeholding - this.offsetWidth || x > placeholding)
-        this.placeunhold();
+      x += placeholding;
+    } else {
+      if (!this.placeholding)
+        placeholding -= this.gap
+      if (x > placeholding) {
+        x -= placeholding;
+      }
+      if (x > placeholding - this.offsetWidth - window.innerWidth / 2) {
+        this.placehold();
+      } else if (this.placeheld) {
+        if (x < placeholding - this.offsetWidth || x > placeholding) {
+          this.placeunhold();
+        }
+      }
     }
   }
   cancelAnimationFrame(this.scrolling);
@@ -647,7 +655,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     var fn = function(time){
       var time = new Date;
       var diff = time - start;
-      var progress = diff / duration;
+      var progress = Math.min(1, diff / duration);
       if (reverse) progress = 1 - progress;
       self.scrollTo(
         x == null ? x : Math.round(fromX + (x - fromX) * self.easing(progress)),
@@ -687,6 +695,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     }
     this.setVisibility();
   }
+  console.log(this.scrolling, this.element.scrollLeft)
 }
 
 
@@ -1003,3 +1012,28 @@ Carousel = function() {
 };
 Carousel.prototype = new Slideshow;
 Carousel.prototype.endless = true;
+
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+ 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+ 
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());

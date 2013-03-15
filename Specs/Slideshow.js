@@ -1,4 +1,4 @@
-var build = function(images, gap) {
+var build = function(images, gap, limit) {
   var element = document.createElement('div');
   var list = document.createElement('ul');
   element.style.overflow = 'hidden';
@@ -7,7 +7,7 @@ var build = function(images, gap) {
   list.style.overflow = 'hidden'
   list.style.width = '2000px'
   list.style.padding = list.style.margin = 0;
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < (limit || 3); i++) {
     var item = document.createElement('li');
     item.style.background = 'orange';
     if (gap)
@@ -114,33 +114,67 @@ describe('Sideshow', function() {
   describe('with picture items', function() {
     describe('exceeding the viewport size', function() {
       describe('vertically', function() {
-        it ('should downscale pictures', function() {
-          var element = build({
-            src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
-            width: 280,
-            height: 335
+        describe('and gap is set', function() {
+          it ('should downscale pictures', function() {
+            var element = build({
+              src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+              width: 280,
+              height: 335
+            })
+            element.style.width = '200px'
+            element.style.height = '200px'
+            document.body.appendChild(element)
+            var slideshow = new Slideshow(element);
+            expect(slideshow.images[0].getAttribute('width')).toBe('280');
+            expect(slideshow.images[0].offsetWidth).toBe(167);
+            expect(slideshow.images[0].getAttribute('height')).toBe('335');
+            expect(slideshow.images[0].offsetHeight).toBe(200);
+            expect(slideshow.scrollWidth).toBe(167*3)
+            expect(slideshow.element.scrollLeft).toBe(0)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2))
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167))
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167))
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2))
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollLeft).toBe(0)
+            document.body.removeChild(element);
           })
-          element.style.width = '200px'
-          element.style.height = '200px'
-          document.body.appendChild(element)
-          var slideshow = new Slideshow(element);
-          expect(slideshow.images[0].getAttribute('width')).toBe('280');
-          expect(slideshow.images[0].offsetWidth).toBe(167);
-          expect(slideshow.images[0].getAttribute('height')).toBe('335');
-          expect(slideshow.images[0].offsetHeight).toBe(200);
-          expect(slideshow.scrollWidth).toBe(167*3)
-          expect(slideshow.element.scrollLeft).toBe(0)
-          slideshow.select('next', true, false);
-          expect(slideshow.element.scrollLeft).toBe(Math.ceil(167 - (200 - 167) / 2))
-          slideshow.select('next', true, false);
-          expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167))
-          slideshow.select('next', true, false);
-          expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167))
-          slideshow.select('previous', true, false);
-          expect(slideshow.element.scrollLeft).toBe(Math.ceil(167 - (200 - 167) / 2))
-          slideshow.select('previous', true, false);
-          expect(slideshow.element.scrollLeft).toBe(0)
-          document.body.removeChild(element);
+        })
+        describe('and gap is set', function() {
+          it ('should downscale pictures and have an off-screen gap', function() {
+            var element = build({
+              src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+              width: 280,
+              height: 335
+            }, 8)
+            element.style.width = '200px'
+            element.style.height = '200px'
+            document.body.appendChild(element)
+            var slideshow = new Slideshow(element, {
+              gap: 8
+            });
+            expect(slideshow.images[0].getAttribute('width')).toBe('280');
+            expect(slideshow.images[0].offsetWidth).toBe(167);
+            expect(slideshow.images[0].getAttribute('height')).toBe('335');
+            expect(slideshow.images[0].offsetHeight).toBe(200);
+            expect(slideshow.scrollWidth).toBe(167 * 3 + 8 * 3)
+            expect(slideshow.element.scrollLeft).toBe(0)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2) + 8)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167) + 24)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167) + 24)
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2) + 8)
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollLeft).toBe(0)
+            document.body.removeChild(element);
+          })
         })
       })
       describe('horizontally', function() {
@@ -185,9 +219,9 @@ describe('Carousel', function() {
         document.body.appendChild(element)
         var slideshow = new Carousel(element);
         expect(slideshow.list.style.width).toBe('600px')
-        expect(slideshow.list.offsetWidth).toBe(600);
+        expect(slideshow.list.offsetWidth).toBe(800);
         expect(slideshow.list.offsetHeight).toBe(200);
-        expect(element.scrollLeft).toBe(0);
+        expect(element.scrollLeft).toBe(600);
         slideshow.select('next', true, false);
         expect(element.scrollLeft).toBe(200);
         slideshow.select('next', true, false);
@@ -219,9 +253,9 @@ describe('Carousel', function() {
         document.body.appendChild(element)
         var slideshow = new Carousel(element, {gap: 8});
         expect(slideshow.list.style.width).toBe('624px')
-        expect(slideshow.list.offsetWidth).toBe(600 + 8 * 3);
+        expect(slideshow.list.offsetWidth).toBe(208 * 4);
         expect(slideshow.list.offsetHeight).toBe(208);
-        expect(element.scrollLeft).toBe(0);
+        expect(element.scrollLeft).toBe(624);
         slideshow.select('next', true, false);
         expect(element.scrollLeft).toBe(200 + 8);
         slideshow.select('next', true, false);
@@ -238,6 +272,7 @@ describe('Carousel', function() {
         expect(element.scrollLeft).toBe(200 + 8)
         slideshow.select('previous', true, false);
         expect(element.scrollLeft).toBe(600 + 24)
+        document.body.removeChild(element);
       })
     })
   })
@@ -247,7 +282,7 @@ describe('Carousel', function() {
       element.style.width = '300px'
       document.body.appendChild(element)
       var slideshow = new Carousel(element);
-      expect(element.scrollLeft).toBe(0);
+      expect(element.scrollLeft).toBe(600);
       slideshow.select('next', true, false);
       expect(element.scrollLeft).toBe(150);
       slideshow.select('next', true, false);
@@ -290,8 +325,8 @@ describe('Carousel', function() {
         expect(slideshow.images[0].offsetWidth).toBe(167);
         expect(slideshow.images[0].getAttribute('height')).toBe('335');
         expect(slideshow.images[0].offsetHeight).toBe(200);
-        expect(slideshow.scrollWidth).toBe(167*3)
-        expect(slideshow.element.scrollLeft).toBe(0)
+        expect(slideshow.scrollWidth).toBe(167*5)
+        expect(slideshow.element.scrollLeft).toBe(501)
         slideshow.select('next', true, false);
         expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2))
         slideshow.select('next', true, false);
@@ -307,6 +342,264 @@ describe('Carousel', function() {
         slideshow.select('previous', true, false);
         expect(slideshow.element.scrollLeft).toBe(Math.floor(167 * 1 - (200 - 167) / 2))
         document.body.removeChild(element);
+      })
+      describe('and gap is set', function() {
+        it ('should downscale pictures and have an off-screen gap', function() {
+          var element = build({
+            src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+            width: 280,
+            height: 335
+          }, 8, 7)
+          element.style.width = '200px'
+          element.style.height = '200px'
+          document.body.appendChild(element)
+          var slideshow = new Carousel(element, {
+            gap: 8
+          });
+          expect(slideshow.images[0].getAttribute('width')).toBe('280');
+          expect(slideshow.images[0].offsetWidth).toBe(167);
+          expect(slideshow.images[0].getAttribute('height')).toBe('335');
+          expect(slideshow.images[0].offsetHeight).toBe(200);
+          expect(slideshow.scrollWidth).toBe((167 + 8) * 9)
+          expect(slideshow.element.scrollLeft).toBe((167 + 8) * 7)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 7 + 8 * 8 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 6 + 8 * 7 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 5 + 8 * 6 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 4 + 8 * 5 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 3 + 8 * 4 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 2 + 8 * 3 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 8 + 8 * 9 - 200)
+          slideshow.select('previous', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 7 + 8 * 8 - 200)
+          slideshow.select('next', true, false)
+          expect(slideshow.element.scrollLeft).toBe(167 * 8 + 8 * 9 - 200)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 1 - 9)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167) + 32)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 3 - (200 - 167) + 40)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 4 - (200 - 167) + 48)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 5 - (200 - 167) + 56)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 6 - (200 - 167) + 64)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 7 - (200 - 167) + 72)
+          slideshow.select('next', true, false);
+          expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2) + 8)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 7 - (200 - 167) + 72)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 6 - (200 - 167) + 64)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 5 - (200 - 167) + 56)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 4 - (200 - 167) + 48)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 3 - (200 - 167) + 40)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167) + 32)
+          slideshow.select('previous', true, false);
+          expect(slideshow.element.scrollLeft).toBe(167 * 1 - 9)
+          document.body.removeChild(element);
+        })
+      })
+      describe('and transition is animated', function() {
+        it ('should animate to the same values as if there were no transition', function() {
+          var element = build({
+            src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+            width: 280,
+            height: 335
+          }, 8, 7)
+          element.style.width = '200px'
+          element.style.height = '200px'
+          document.body.appendChild(element)
+          var slideshow = s = new Carousel(element, {
+            gap: 8
+          });
+          expect(slideshow.images[0].getAttribute('width')).toBe('280');
+          expect(slideshow.images[0].offsetWidth).toBe(167);
+          expect(slideshow.images[0].getAttribute('height')).toBe('335');
+          expect(slideshow.images[0].offsetHeight).toBe(200);
+          expect(slideshow.scrollWidth).toBe((167 + 8) * 9)
+          expect(slideshow.element.scrollLeft).toBe((167 + 8) * 7)
+          slideshow.select('previous', true)
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {expect(slideshow.element.scrollLeft).toBe(167 * 7 + 8 * 8 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+           expect(slideshow.element.scrollLeft).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {expect(slideshow.element.scrollLeft).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {  
+            expect(slideshow.element.scrollLeft).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 8 + 8 * 9 - 200)
+            slideshow.select('previous', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 7 + 8 * 8 - 200)
+            slideshow.select('next', true, 100)
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 8 + 8 * 9 - 200)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 1 - 9)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167) + 32)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 3 - (200 - 167) + 40)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 4 - (200 - 167) + 48)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 5 - (200 - 167) + 56)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 6 - (200 - 167) + 64)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 7 - (200 - 167) + 72)
+            slideshow.select('next', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(Math.floor(167 - (200 - 167) / 2) + 8)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 7 - (200 - 167) + 72)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 6 - (200 - 167) + 64)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 5 - (200 - 167) + 56)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 4 - (200 - 167) + 48)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 3 - (200 - 167) + 40)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 2 - (200 - 167) + 32)
+            slideshow.select('previous', true, 100);
+          })
+          waitsFor(function() {
+            return !slideshow.scrolling
+          });
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 1 - 9)
+            document.body.removeChild(element);
+          })
+        })
       })
     })
     describe('horizontally', function() {
@@ -324,8 +617,8 @@ describe('Carousel', function() {
         expect(slideshow.images[0].offsetWidth).toBe(200);
         expect(slideshow.images[0].getAttribute('height')).toBe('335');
         expect(slideshow.images[0].offsetHeight).toBe(239);
-        expect(slideshow.scrollWidth).toBe(200*3)
-        expect(slideshow.element.scrollLeft).toBe(0)
+        expect(slideshow.scrollWidth).toBe(200*4)
+        expect(slideshow.element.scrollLeft).toBe(200 * 3)
         slideshow.select('next', true, false);
         expect(slideshow.element.scrollLeft).toBe(200)
         slideshow.select('next', true, false);
