@@ -38,16 +38,20 @@
   window.onload = function() {
     var preload = ['http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg']
     var preloaded = 0;
+    if (location.query.indexOf('preload') == -1)
+      return jasmineEnv.execute();
+    
     preload.forEach(function(src) {
       var img = document.createElement('img');
       img.src = src
       img.onload = img.onerror = function() {
+        document.body.removeChild(img)
         preloaded++;
         if (preloaded == preload.length)
           jasmineEnv.execute();
       }
+      document.body.appendChild(img);
     });
-    document.body.appendChild(img);
   }
 })();
 </script>

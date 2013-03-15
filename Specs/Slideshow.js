@@ -430,6 +430,7 @@ describe('Carousel', function() {
           expect(slideshow.images[0].offsetWidth).toBe(167);
           expect(slideshow.images[0].getAttribute('height')).toBe('335');
           expect(slideshow.images[0].offsetHeight).toBe(200);
+          expect(slideshow.placeholding).toBe(350)
           expect(slideshow.scrollWidth).toBe((167 + 8) * 9)
           expect(slideshow.element.scrollLeft).toBe((167 + 8) * 7)
           slideshow.select('previous', true)
@@ -596,7 +597,7 @@ describe('Carousel', function() {
             return !slideshow.scrolling
           });
           runs(function() {
-            expect(slideshow.element.scrollLeft).toBe(167 * 1 - 9)
+              expect(slideshow.element.scrollLeft).toBe(167 * 1 - 9)
             document.body.removeChild(element);
           })
         })
