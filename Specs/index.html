@@ -36,7 +36,18 @@
   };
 
   window.onload = function() {
-    jasmineEnv.execute();
+    var preload = ['http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg']
+    var preloaded = 0;
+    preload.forEach(function(src) {
+      var img = document.createElement('img');
+      img.src = src
+      img.onload = img.onerror = function() {
+        preloaded++;
+        if (preloaded == preload.length)
+          jasmineEnv.execute();
+      }
+    });
+    document.body.appendChild(img);
   }
 })();
 </script>
