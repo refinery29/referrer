@@ -58,6 +58,7 @@ Slideshow = function(element, options) {
   this.select(this.items[0]);
   this.onResize()
   this.scrollTo(0)
+  console.error(this.element.scrollLeft, this.placeholding)
 
   var self = this;
   this.hammer = hammer = new Hammer(document.body, {
@@ -506,7 +507,6 @@ Slideshow.prototype.placehold = function() {
     if (child) {
       this.placeheld.push(child);
       this.list.appendChild(child)
-  console.error('placehokding', width)
       width += this.offsetWidths[i] + this.gap;
       if (width + (i + 1) * this.gap >= this.offsetWidth)
         break;
@@ -621,7 +621,6 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
   }
   if (!smooth && this.endless) {
     var placeholding = this.scrollWidth - (this.placeholding || 0);
-    console.log(x)
     if (x <= 0) {
       this.placehold();
       x += placeholding;
@@ -695,7 +694,6 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     }
     this.setVisibility();
   }
-  console.log(this.scrolling, this.element.scrollLeft)
 }
 
 
