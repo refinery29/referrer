@@ -1,3 +1,3 @@
-(function Fixtures_cdn_ga() {
+(Fixtures_cdn_ga = function() {
   _gaq = _gat = []
 })();
