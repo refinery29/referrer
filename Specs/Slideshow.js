@@ -128,7 +128,7 @@ describe('Sideshow', function() {
             expect(slideshow.images[0].getAttribute('width')).toBe('280');
             expect(slideshow.images[0].offsetWidth).toBe(167);
             expect(slideshow.images[0].getAttribute('height')).toBe('335');
-            expect(slideshow.images[0].offsetHeight).toBe(200);
+            expect(slideshow.element.offsetHeight).toBe(200);
             expect(slideshow.scrollWidth).toBe(167*3)
             expect(slideshow.element.scrollLeft).toBe(0)
             slideshow.select('next', true, false);
@@ -160,7 +160,7 @@ describe('Sideshow', function() {
             expect(slideshow.images[0].getAttribute('width')).toBe('280');
             expect(slideshow.images[0].offsetWidth).toBe(167);
             expect(slideshow.images[0].getAttribute('height')).toBe('335');
-            expect(slideshow.images[0].offsetHeight).toBe(200);
+            expect(slideshow.element.offsetHeight).toBe(200);
             expect(slideshow.scrollWidth).toBe(167 * 3 + 8 * 3)
             expect(slideshow.element.scrollLeft).toBe(0)
             slideshow.select('next', true, false);
@@ -191,7 +191,7 @@ describe('Sideshow', function() {
           expect(slideshow.images[0].getAttribute('width')).toBe('280');
           expect(slideshow.images[0].offsetWidth).toBe(200);
           expect(slideshow.images[0].getAttribute('height')).toBe('335');
-          expect(slideshow.images[0].offsetHeight).toBe(239);
+          expect(slideshow.element.offsetHeight).toBe(335);
           expect(slideshow.scrollWidth).toBe(200*3)
           expect(slideshow.element.scrollLeft).toBe(0)
           slideshow.select('next', true, false);
@@ -204,7 +204,13 @@ describe('Sideshow', function() {
           expect(slideshow.element.scrollLeft).toBe(200)
           slideshow.select('previous', true, false);
           expect(slideshow.element.scrollLeft).toBe(0)
-          document.body.removeChild(element);
+          waitsFor(function() {
+            return slideshow.images[0].offsetHeight;
+          })
+          runs(function() {
+            expect(slideshow.images[0].offsetHeight).toBe(239)
+            document.body.removeChild(element);
+          })
         })
       })
     })
@@ -324,7 +330,7 @@ describe('Carousel', function() {
         expect(slideshow.images[0].getAttribute('width')).toBe('280');
         expect(slideshow.images[0].offsetWidth).toBe(167);
         expect(slideshow.images[0].getAttribute('height')).toBe('335');
-        expect(slideshow.images[0].offsetHeight).toBe(200);
+        expect(slideshow.element.offsetHeight).toBe(200);
         expect(slideshow.scrollWidth).toBe(167*5)
         expect(slideshow.element.scrollLeft).toBe(501)
         slideshow.select('next', true, false);
@@ -359,7 +365,7 @@ describe('Carousel', function() {
           expect(slideshow.images[0].getAttribute('width')).toBe('280');
           expect(slideshow.images[0].offsetWidth).toBe(167);
           expect(slideshow.images[0].getAttribute('height')).toBe('335');
-          expect(slideshow.images[0].offsetHeight).toBe(200);
+          expect(slideshow.element.offsetHeight).toBe(200);
           expect(slideshow.scrollWidth).toBe((167 + 8) * 9)
           expect(slideshow.element.scrollLeft).toBe((167 + 8) * 7)
           slideshow.select('previous', true, false)
@@ -429,7 +435,7 @@ describe('Carousel', function() {
           expect(slideshow.images[0].getAttribute('width')).toBe('280');
           expect(slideshow.images[0].offsetWidth).toBe(167);
           expect(slideshow.images[0].getAttribute('height')).toBe('335');
-          expect(slideshow.images[0].offsetHeight).toBe(200);
+          expect(slideshow.element.offsetHeight).toBe(200);
           expect(slideshow.placeholding).toBe(350)
           expect(slideshow.scrollWidth).toBe((167 + 8) * 9)
           expect(slideshow.element.scrollLeft).toBe((167 + 8) * 7)
@@ -617,7 +623,7 @@ describe('Carousel', function() {
         expect(slideshow.images[0].getAttribute('width')).toBe('280');
         expect(slideshow.images[0].offsetWidth).toBe(200);
         expect(slideshow.images[0].getAttribute('height')).toBe('335');
-        expect(slideshow.images[0].offsetHeight).toBe(239);
+        expect(slideshow.element.offsetHeight).toBe(335);
         expect(slideshow.scrollWidth).toBe(200*4)
         expect(slideshow.element.scrollLeft).toBe(200 * 3)
         slideshow.select('next', true, false);
@@ -636,7 +642,13 @@ describe('Carousel', function() {
         expect(slideshow.element.scrollLeft).toBe(200)
         slideshow.select('previous', true, false);
         expect(slideshow.element.scrollLeft).toBe(600)
-        document.body.removeChild(element);
+        waitsFor(function() {
+          return slideshow.images[0].offsetHeight;
+        })
+        runs(function() {
+          expect(slideshow.images[0].offsetHeight).toBe(239)
+          document.body.removeChild(element);
+        })
       })
     })
   })
