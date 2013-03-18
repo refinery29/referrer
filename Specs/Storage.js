@@ -111,7 +111,7 @@ describe('R29.Storage', function() {
             setCookie('0', '1');
             R29.Storage.Cookies(callback);
             expect(i).toBe(2);
-            expect(args).toEqual([['0', '1'], ['1', '2']])
+            expect(args.sort()).toEqual([['0', '1'], ['1', '2']])
             unsetCookie('0');
             unsetCookie('1');
           })
@@ -149,7 +149,7 @@ describe('R29.Storage', function() {
               setCookie('0', '1', prefix);
               R29.Storage.Cookies(callback, prefix);
               expect(i).toBe(2);
-              expect(args).toEqual([['0', '1'], ['1', '2']])
+              expect(args.sort()).toEqual([['0', '1'], ['1', '2']])
               unsetCookie('0', prefix);
               unsetCookie('1', prefix);
             })
@@ -227,7 +227,7 @@ describe('R29.Storage', function() {
             setCookie('0', '1', prefix);
             R29.Storage.Cookies(callback, prefix);
             expect(i).toBe(2);
-            expect(args).toEqual([['0', '1'], ['1', '2']])
+            expect(args.sort()).toEqual([['0', '1'], ['1', '2']])
             unsetCookie('0', prefix);
             unsetCookie('1', prefix);
           })
