@@ -1,10 +1,33 @@
 {
   "testling" : {
     "scripts": [
-      "tests/lib/jasmine/jasmine.js",
-      "tests/lib/jasmine/jasmine-tap.js",
-      "tests/specs/*.js",
-      "tests/runner.js"
+      "Specs/Jasmine/Jasmine.js",
+      "Specs/Jasmine/Tap.js",
+      "Specs/Jasmine/Setup.js",
+      "Source/R29.js",
+      "Source/URI.js",
+      "Source/Storage.js",
+      "Source/Storage.Indexed.js",
+      "Source/Storage.Cookies.js",
+      "Source/Log.js",
+      "Source/Referrers.js",
+      "Source/Console.js",
+      "Source/Events.js",
+      "Source/Document.js",
+      "Source/Script.js",
+      "Source/Fragment.js",
+      "Source/Slideshow.js",
+      "Specs/Jasmine/Jasmine.js",
+      "Specs/Jasmine/HTML.js",
+      "Specs/Jasmine/Tap.js",
+      "Specs/Jasmine/Testling.js",
+      "Specs/Referrers.js",
+      "Specs/Log.js",
+      "Specs/Storage.js",
+      "Specs/Document.js",
+      "Specs/URI.js",
+      "Specs/Fragment.js",
+      "Specs/Slideshow.js",
     ]
   }
 }
