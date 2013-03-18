@@ -1,0 +1,44 @@
+{
+  "name": "r29",
+  "version": "0.0.1",
+  "testling" : {
+    "browsers": {
+      "ie": [ 6, 7, 8, 9, 10 ],
+      "ff": [ 12, 13, 14, 15, 16, 17 ],
+      "chrome": [ 20, 21, 22, 23 ],
+      "opera": [ 10, 11, 12 ],
+      "safari": [ 5.1, 6 ],
+      "iphone": [ 6 ],
+      "ipad": [ 6 ]
+    },
+    "scripts": [
+      "Specs/Jasmine/Jasmine.js",
+      "Specs/Jasmine/Tap.js",
+      "Specs/Jasmine/Setup.js",
+      "Source/R29.js",
+      "Source/URI.js",
+      "Source/Storage.js",
+      "Source/Storage.Indexed.js",
+      "Source/Storage.Cookies.js",
+      "Source/Log.js",
+      "Source/Referrers.js",
+      "Source/Console.js",
+      "Source/Events.js",
+      "Source/Document.js",
+      "Source/Script.js",
+      "Source/Fragment.js",
+      "Source/Slideshow.js",
+      "Specs/Jasmine/Jasmine.js",
+      "Specs/Jasmine/HTML.js",
+      "Specs/Jasmine/Tap.js",
+      "Specs/Jasmine/Testling.js",
+      "Specs/Referrers.js",
+      "Specs/Log.js",
+      "Specs/Storage.js",
+      "Specs/Document.js",
+      "Specs/URI.js",
+      "Specs/Fragment.js",
+      "Specs/Slideshow.js",
+    ]
+  }
+}
