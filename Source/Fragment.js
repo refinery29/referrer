@@ -133,9 +133,7 @@ R29.Fragment.prototype.evaluate = function(callback, stack, context, partial) {
 R29.Fragment.prototype.execute = function(node, stack, callback) {
   if (node.src) {
     // load or queue up a script if another ad is currently loading
-    console.error(node.src)
     return this.load(node, function(event) {
-      console.log('loaded', node.src)
       event.target.parentNode.removeChild(event.target);
       this.evaluate(callback, this, node, true);
     }, function() {
@@ -148,7 +146,6 @@ R29.Fragment.prototype.execute = function(node, stack, callback) {
     this.capture(function() {
       // eval in global scope so var definitions set global variables
       // http://perfectionkills.com/global-eval-what-are-the-options/
-      console.log('eval', node.innerText);
       (1, eval)(node.innerText);
     }, stack, node)
   }

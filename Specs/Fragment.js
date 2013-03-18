@@ -239,6 +239,11 @@ it ('should wait for remote scripts before executing inline scripts after that',
       expect(typeof _gat != 'undefined').toBe(true)
       expect(middle).toBe(2)
       expect(after).toBe(3)
+      delete window.before;
+      delete window.after;
+      delete window.middle;
+      delete _gat;
+      delete _gaq;
       expect(ad.map(function(e) {
         return e.tagName || e.textContent
       })).toEqual(['123', 'SCRIPT', 'SCRIPT', '666', 'SCRIPT', '1', 'SCRIPT', 'SCRIPT', 'A', '321', 'SCRIPT'])
@@ -265,6 +270,11 @@ it ('should wait for remote scripts before executing inline scripts after that',
       expect(typeof _gat != 'undefined').toBe(true)
       expect(middle).toBe(2)
       expect(after).toBe(3)
+      delete window.before;
+      delete window.after;
+      delete window.middle;
+      delete _gat;
+      delete _gaq;
       expect(ad.map(function(e) {
         return e.tagName || e.textContent
       })).toEqual(['123', 'SCRIPT', 'SCRIPT', '666', 'SCRIPT', '1', 'SCRIPT', 'SCRIPT', 'before', 'SCRIPT', 'A', 'after', '321', 'SCRIPT'])
