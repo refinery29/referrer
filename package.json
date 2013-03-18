@@ -28,17 +28,14 @@
       "Source/Script.js",
       "Source/Fragment.js",
       "Source/Slideshow.js",
-      "Specs/Jasmine/Jasmine.js",
-      "Specs/Jasmine/HTML.js",
-      "Specs/Jasmine/Tap.js",
-      "Specs/Jasmine/Testling.js",
       "Specs/Referrers.js",
       "Specs/Log.js",
       "Specs/Storage.js",
       "Specs/Document.js",
       "Specs/URI.js",
       "Specs/Fragment.js",
-      "Specs/Slideshow.js"
+      "Specs/Slideshow.js",
+      "Specs/Jasmine/Runner.js"
     ]
   }
 }
