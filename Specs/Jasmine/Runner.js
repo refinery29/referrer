@@ -1,14 +1,12 @@
 var jasmineEnv = jasmine.getEnv();
 jasmineEnv.updateInterval = 250;
+var htmlReporter = new jasmine.HtmlReporter();
+jasmineEnv.addReporter(htmlReporter);
+jasmineEnv.specFilter = function(spec) {
+  return htmlReporter.specFilter(spec);
+};
 
-if (typeof jasmine.HtmlReporter != 'undefined') {
-  var htmlReporter = new jasmine.HtmlReporter();
-  jasmineEnv.addReporter(htmlReporter);
-  jasmineEnv.specFilter = function(spec) {
-    return htmlReporter.specFilter(spec);
-  };
-
-} else {
+if (typeof jasmine.TapReporter != 'undefined') {
   var tapReporter = new jasmine.TapReporter();
   jasmineEnv.addReporter(tapReporter);
 }

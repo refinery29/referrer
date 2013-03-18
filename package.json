@@ -13,8 +13,8 @@
     },
     "scripts": [
       "Specs/Jasmine/Jasmine.js",
+      "Specs/Jasmine/HTML.js",
       "Specs/Jasmine/Tap.js",
-      "Specs/Jasmine/Setup.js",
       "Source/R29.js",
       "Source/URI.js",
       "Source/Storage.js",
