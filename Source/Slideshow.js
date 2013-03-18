@@ -58,9 +58,13 @@ Slideshow = function(element, options) {
   this.select(this.items[0]);
   this.onResize()
   this.scrollTo(0)
+  this.attach();
+};
+Slideshow.prototype.attach = function() {
 
   var self = this;
-  this.hammer = hammer = new Hammer(document.body, {
+  var element = this.element;
+  this.hammer = hammer = new Hammer(this.inline ? element : document.body, {
     swipe: false,
     hold: false,
     //prevent_default: true,
@@ -289,7 +293,11 @@ Slideshow = function(element, options) {
     delete hammer.up;
     delete self.dragging;
   }
-};
+}
+Slideshow.prototype.detach = function() {
+  if (this.hammer)
+    this.hammer.disable()
+}
 Slideshow.prototype.previous = function() {
   this.select('previous');
 }
