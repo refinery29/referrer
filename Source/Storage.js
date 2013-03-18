@@ -154,9 +154,9 @@ R29.Storage.prototype.callback = function(callback, key, value, meta) {
 }
 R29.Storage.prototype.prefix = '';
 R29.Storage.Local = new R29.Storage(undefined, 'Local');
-R29.Storage.Local.prototype.adapter = localStorage;
+R29.Storage.Local.prototype.adapter = window.localStorage;
 
 R29.Storage.Session = new R29.Storage(undefined, 'Session');
-R29.Storage.Session.prototype.adapter = sessionStorage;
+R29.Storage.Session.prototype.adapter = window.sessionStorage;
 
 R29.Storage.initialize();
