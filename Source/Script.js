@@ -62,6 +62,8 @@ R29.Script.prototype.load = function(src, onComplete, onStart) {
       onStart.call(this);
     if (script.nodeType)
       document.body.appendChild(script)
+    else
+      setTimeout(script, 10)
   } else if (onStart) {
     script.onstart = onStart
   }
