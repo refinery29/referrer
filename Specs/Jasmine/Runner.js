@@ -10,9 +10,9 @@ if (typeof jasmine.TapReporter != 'undefined') {
   var tapReporter = new jasmine.TapReporter();
   jasmineEnv.addReporter(tapReporter);
 }
-console.log('pre onload')
+console.error('pre onload')
 window.onload = function() {
-  console.log('onload', document.body)
+  console.error('onload', document.body)
   var preload = ['http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg']
   var preloaded = 0;
   if (location.search.indexOf('preload') == -1)
