@@ -133,8 +133,8 @@ R29.Fragment.prototype.evaluate = function(callback, stack, context, partial) {
 R29.Fragment.prototype.execute = function(node, stack, callback) {
   if (node.src) {
     // load or queue up a script if another ad is currently loading
-    return this.load(node, function(event) {
-      event.target.parentNode.removeChild(event.target);
+    return this.load(node, function(event, script) {
+      script.parentNode.removeChild(script);
       this.evaluate(callback, this, node, true);
     }, function() {
       // redefine document.write()

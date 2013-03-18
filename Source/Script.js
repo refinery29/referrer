@@ -48,7 +48,7 @@ R29.Script.prototype.load = function(src, onComplete, onStart) {
   if (group)
     var queue = (this.groups[group] || (this.groups[group] = []))
   script.onload = script.onerror = function(event) {
-    thus.onFinish(event, queue, onComplete)
+    thus.onFinish(event, queue, onComplete, script)
   }
   script.type= 'text/javascript'
   if (src.nodeType)
@@ -66,9 +66,9 @@ R29.Script.prototype.load = function(src, onComplete, onStart) {
   return script;
 };
 
-R29.Script.prototype.onFinish = function(event, queue, onComplete) {
-  if (this.script == event.target) {
-    this.loaded = event.target.src;
+R29.Script.prototype.onFinish = function(event, queue, onComplete, script) {
+  if (this.script == script) {
+    this.loaded = script.src;
     if (this.onComplete)
       this.onComplete(event);
     if (event.type == 'error') {

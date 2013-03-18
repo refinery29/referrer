@@ -335,9 +335,11 @@ describe('R29.Storage', function() {
     unsetCookie('2', 'a')
   })
   describe('.Local', function() {
-    setLocal('test', 'a');
-    var local = getLocal('test');
-    unsetLocal('test')
+    try {
+      setLocal('test', 'a');
+      var local = getLocal('test');
+      unsetLocal('test')
+    } catch(e) {};
     if (!local) return;
     describe('when called with no arguments', function() {
       describe('with a forced context', function() {
