@@ -91,7 +91,10 @@ R29.Script.prototype.onFinish = function(event, queue, onComplete, script) {
         next.onstart.call(this);
         delete next.onstart;
       }
-      document.body.appendChild(next);
+      if (next.nodeType)
+        document.body.appendChild(next);
+      else 
+        setTimeout(next, 10);
     }
   }
 };
