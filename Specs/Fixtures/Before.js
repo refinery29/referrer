@@ -2,8 +2,7 @@ document.wwrite = document.write;
 document.write = function() {};
 R29.Script.prototype.include = function(include) {
   return function(src, callback) {
-    var replaced = 'Fixtures' + src.split('Fixtures')[1].replace(/^[a-zA-Z0-9]+/g, '_').replace('.js', '');
-    alert(replaced)
+    var replaced = 'Fixtures' + src.split('Fixtures')[1].replace(/[^a-zA-Z0-9]+/g, '_').replace('.js', '');
     if (window[replaced]) {
       setTimeout(function() {
         window[replaced]();
