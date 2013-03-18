@@ -3,6 +3,9 @@ R29.js
 
 A library of a few simple stand-alone modules that enable advanced session tracking capabilities on clientside. Modules can be used separately or together (e.g. a R29.Referrers is a STORED LOG of URLs)
 
+[![browser support](http://ci.testling.com/refinery29/referrer.png)](http://ci.testling.com/refinery29/referrer)
+
+
 R29.Referrers
 ====
 
