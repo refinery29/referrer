@@ -35,7 +35,13 @@
       "Specs/URI.js",
       "Specs/Fragment.js",
       "Specs/Slideshow.js",
-      "Specs/Jasmine/Runner.js"
+      "Specs/Jasmine/Runner.js",
+      "Specs/Fixtures/Before.js",
+      "Specs/Fixtures/cdn/ga.js",
+      "Specs/Fixtures/cdn/jqueryRunner.js",
+      "Specs/Fixtures/doubleclick.net/image.js",
+      "Specs/Fixtures/doubleclick.net/script.js",
+      "Specs/Fixtures/After.js"
     ]
   }
 }

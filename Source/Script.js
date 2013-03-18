@@ -23,6 +23,14 @@ R29.Script.prototype.isLoaded = function(src) {
   return this.loaded == src;
 };
 
+R29.Script.prototype.include = function(src, callback) {
+  var script = document.createElement('script');
+  script.type= 'text/javascript';
+  script.onload = script.onerror = callback;
+  script.src = src;
+  return script;
+};
+
 R29.Script.prototype.load = function(src, onComplete, onStart) {
   if (!src)
     src = this.getURL && this.getURL() || this.src || this[location.protocol] || this.http;
@@ -41,25 +49,19 @@ R29.Script.prototype.load = function(src, onComplete, onStart) {
     return;
   }
   if (!src || (this.script && this.script == src)) return;
-  var script = document.createElement('script');
-  if (!this.script) this.script = script;
   var thus = this;
   var group = this.group;
+  var script = this.include(src, function(event) {
+    thus.onFinish(event, queue, onComplete, script)
+  })
+  if (!this.script) this.script = script;
   if (group)
     var queue = (this.groups[group] || (this.groups[group] = []))
-  script.onload = script.onerror = function(event) {
-    thus.onFinish(event, queue, onComplete, script)
-  }
-  script.type= 'text/javascript'
-  if (src.nodeType)
-    for (var i = 0, attribute; attribute = src.attributes[i++];)
-      script.setAttribute(attribute.name, attribute.value);
-  else
-    script.src = src;  
   if (!queue || queue.push(script) == 1) {
     if (onStart)
       onStart.call(this);
-    document.body.appendChild(script)
+    if (script.nodeType)
+      document.body.appendChild(script)
   } else if (onStart) {
     script.onstart = onStart
   }
@@ -73,14 +75,14 @@ R29.Script.prototype.onFinish = function(event, queue, onComplete, script) {
       this.onComplete(event);
     if (event.type == 'error') {
       if (this.onError)
-        this.onError(event)
+        this.onError(event, script)
     } else {
       if (this.onSuccess)
-        this.onSuccess(event);
+        this.onSuccess(event, script);
     }
   }
   if (onComplete)
-    onComplete.call(this, event);
+    onComplete.call(this, event, script);
   if (queue) {
     queue.shift();
     var next = queue[0];

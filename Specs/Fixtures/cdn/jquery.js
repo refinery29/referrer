@@ -1,1 +1,3 @@
-if (!window.jQuery) jQuery = {};
+(function Fixtures_cdn_jquery() {
+  if (!window.jQuery) jQuery = {};
+})()
