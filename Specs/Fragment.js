@@ -117,7 +117,6 @@ describe('R29.Fragment', function() {
     var finished = false;
     ad.evaluate(function() {
       finished = true;
-      if (!window._gat) throw "GA is not initialized. Why?"
     }, fragment);
     waitsFor(function() {
       return window._gat != null;
