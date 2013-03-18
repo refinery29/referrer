@@ -58,7 +58,6 @@ Slideshow = function(element, options) {
   this.select(this.items[0]);
   this.onResize()
   this.scrollTo(0)
-  console.error(this.element.scrollLeft, this.placeholding)
 
   var self = this;
   this.hammer = hammer = new Hammer(document.body, {
@@ -651,7 +650,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     var self = this;
     var maxX = this.scrollWidth - this.offsetWidth;
     x = Math.min(x, maxX);
-    var fn = function(time){
+    var fn = function(){
       var time = new Date;
       var diff = time - start;
       var progress = Math.min(1, diff / duration);
@@ -664,7 +663,8 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
         element,
         reverse
       );
-      if (diff < duration) self.scrolling = requestAnimationFrame(fn)
+      if (diff < duration) 
+        self.scrolling = requestAnimationFrame(fn)
       else {
         delete self.scrolling;
         delete self.busy;
@@ -833,6 +833,8 @@ Slideshow.prototype.onResize = function(image) {
     this.offsetWidths[index] = offsetWidth;
     this.offsetHeights[index] = item.offsetHeight;
     total += offsetWidth + (item.className.indexOf('final') > -1 ? 0 : this.gap);
+    this.scrollLeft = this.element.scrollLeft;
+    this.scrollTop = this.element.scrollTop;
   }
   
   if (resizing) return this.select(selected, true, false);

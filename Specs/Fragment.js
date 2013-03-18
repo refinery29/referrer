@@ -6,7 +6,6 @@ describe('R29.Fragment', function() {
     expect(document.write).toNotBe(write);
     document.write('<b>123</b> 123 <hr>');
     var fragment = ad.release()
-    console.log(ad.childNodes)
     expect(ad.childNodes[0].tagName).toBe('B');
     expect(ad.childNodes[1].nodeType).toBe(3);
     expect(ad.childNodes[2].tagName).toBe('HR');
@@ -111,7 +110,7 @@ describe('R29.Fragment', function() {
     var ad = new R29.Fragment;
     ad.capture();
     expect(window._gaq).toBe(undefined);
-    document.write('<script src="http://google-analytics.com/ga.js"></script>')
+    document.write('<script src="Fixtures/cdn/ga.js"></script>')
     var fragment = ad.release();
     expect(ad.childNodes[0].tagName).toBe('SCRIPT');
     expect(window._gaq).toBe(undefined);
@@ -133,7 +132,7 @@ describe('R29.Fragment', function() {
   it ('should execute scripts that document.write() async scripts', function() {
     var ad = new R29.Fragment;
     ad.capture();
-    document.write('123<script>document.write("<script src=\\"http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js\\"></sc" + "ript>")</script>')
+    document.write('123<script>document.write("<script src=\\"Fixtures/cdn/jquery.js\\"></sc" + "ript>")</script>')
     document.write('321')
     expect(window.jQuery).toBeUndefined()
     var finished;
@@ -144,7 +143,7 @@ describe('R29.Fragment', function() {
     expect(ad.childNodes[1].tagName).toBe('SCRIPT')
     expect(ad.childNodes[1].getAttribute('src')).toBe(null);
     expect(ad.childNodes[2].tagName).toBe('SCRIPT')
-    expect(ad.childNodes[2].getAttribute('src')).toBe('http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js');
+    expect(ad.childNodes[2].getAttribute('src')).toBe('Fixtures/cdn/jquery.js');
     expect(ad.childNodes[3].textContent).toBe('321')
     waitsFor(function() {
       return finished;
@@ -159,7 +158,7 @@ describe('R29.Fragment', function() {
   it ('should execute scripts that document.write() async scripts that document.write() content', function() {
     var ad = new R29.Fragment;
     ad.capture();
-    document.write('123<script>document.write("<script src=\\"http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?\\"></sc" + "ript>")</script>321')
+    document.write('123<script>document.write("<script src=\\"Fixtures/doubleclick.net/image.js\\"></sc" + "ript>")</script>321')
     var finished = false;
     ad.evaluate(function() {
        finished = true;
@@ -168,7 +167,7 @@ describe('R29.Fragment', function() {
     expect(ad.childNodes[1].tagName).toBe('SCRIPT')
     expect(ad.childNodes[1].getAttribute('src')).toBe(null);
     expect(ad.childNodes[2].tagName).toBe('SCRIPT')
-    expect(ad.childNodes[2].getAttribute('src')).toBe('http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?');
+    expect(ad.childNodes[2].getAttribute('src')).toBe('Fixtures/doubleclick.net/image.js');
     expect(ad.childNodes[3].textContent).toBe('321')
     expect(finished).toBe(false)
     waitsFor(finished, function() {
@@ -179,7 +178,7 @@ describe('R29.Fragment', function() {
       expect(ad.childNodes[1].tagName).toBe('SCRIPT')
       expect(ad.childNodes[1].getAttribute('src')).toBe(null);
       expect(ad.childNodes[2].tagName).toBe('SCRIPT')
-      expect(ad.childNodes[2].getAttribute('src')).toBe('http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?');
+      expect(ad.childNodes[2].getAttribute('src')).toBe('Fixtures/doubleclick.net/image.js');
       //banner that was document.written() is inserted after the script
       expect(ad.childNodes[3].tagName).toBe('A')
       expect(ad.childNodes[4].textContent).toBe('321')
@@ -189,7 +188,7 @@ describe('R29.Fragment', function() {
 it ('should wait for remote scripts before executing inline scripts after that', function() {
     var ad = new R29.Fragment;
     ad.capture();
-    document.write('123<script>document.write("<script src=\\"http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?\\"></sc" + "ript>")</script>321<script>var z = 123</script>')
+    document.write('123<script>document.write("<script src=\\"Fixtures/doubleclick.net/image.js\\"></sc" + "ript>")</script>321<script>var z = 123</script>')
     var finished = false;
     ad.evaluate(function(stack) {
        finished = true;
@@ -198,7 +197,7 @@ it ('should wait for remote scripts before executing inline scripts after that',
     expect(ad.childNodes[1].tagName).toBe('SCRIPT')
     expect(ad.childNodes[1].getAttribute('src')).toBe(null);
     expect(ad.childNodes[2].tagName).toBe('SCRIPT')
-    expect(ad.childNodes[2].getAttribute('src')).toBe('http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?');
+    expect(ad.childNodes[2].getAttribute('src')).toBe('Fixtures/doubleclick.net/image.js');
     expect(ad.childNodes[3].textContent).toBe('321')
     expect(ad.childNodes[4].tagName).toBe('SCRIPT')
     expect(finished).toBe(false)
@@ -211,7 +210,7 @@ it ('should wait for remote scripts before executing inline scripts after that',
       expect(ad.childNodes[1].tagName).toBe('SCRIPT')
       expect(ad.childNodes[1].getAttribute('src')).toBe(null);
       expect(ad.childNodes[2].tagName).toBe('SCRIPT')
-      expect(ad.childNodes[2].getAttribute('src')).toBe('http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?');
+      expect(ad.childNodes[2].getAttribute('src')).toBe('Fixtures/doubleclick.net/image.js');
       //banner that was document.written() is inserted after the script
       expect(ad.childNodes[3].tagName).toBe('A')
       expect(ad.childNodes[4].textContent).toBe('321')
@@ -221,39 +220,18 @@ it ('should wait for remote scripts before executing inline scripts after that',
     })
   })
 
-  xit ('should load multiple scripts in order', function() {
+  it ('should load multiple scripts in order', function() {
     var ad = new R29.Fragment;
     ad.capture();
     document.write('123'
     + '<script>var before = 1</script>'
-    + '<script src="http://google-analytics.com/ga.js"></script>'
+    + '<script src="Fixtures/cdn/ga.js"></script>'
     + '666'
     + '<script>var middle = 2; document.write(before)</script>'
-    + '<script>document.write("<script src=\\"http://ad.doubleclick.net/adj/r29.oao/beauty/makeup;s1=beauty;s2=makeup;sponsorship=;pagetype=entry;test=;pageid=shiseido-stops-animal-testing-cosmetics;tags=;pos=middle;tile=3;dcopt=;sz=300x251;ord=1362420299507?\\"></sc" + "ript>")</script>'
+    + '<script>document.write("<script src=\\"Fixtures/doubleclick.net/image.js\\"></sc" + "ript>")</script>'
     + '321'
     + '<script>var after = 3</script>')
-    ad.evaluate(function() {
-      finished = true;
-    })
-    expect(before).toBe(1);
-    expect(typeof _gat == 'undefined').toBe(true)
-    expect(typeof middle == 'undefined').toBe(true)
-    expect(typeof after == 'undefined').toBe(true)
-    expect(ad.map(function(e) {
-      return e.tagName || e.textContent
-    })).toEqual(['123', 'SCRIPT', 'SCRIPT', '666', 'SCRIPT', 'SCRIPT', '321', 'SCRIPT'])
-    waitsFor(function() {
-      return window._gat
-    })
-    runs(function() {
-      expect(typeof _gat != 'undefined').toBe(true)
-      expect(middle).toBe(2)
-      expect(typeof after == 'undefined').toBe(true)
-      expect(ad.map(function(e) {
-        return e.tagName || e.textContent
-      })).toEqual(['123', 'SCRIPT', 'SCRIPT', '666', 'SCRIPT', '1', 'SCRIPT', 'SCRIPT', '321', 'SCRIPT'])
-    })
-
+    ad.evaluate()
     waitsFor(function() {
       return window.after
     })
@@ -264,6 +242,32 @@ it ('should wait for remote scripts before executing inline scripts after that',
       expect(ad.map(function(e) {
         return e.tagName || e.textContent
       })).toEqual(['123', 'SCRIPT', 'SCRIPT', '666', 'SCRIPT', '1', 'SCRIPT', 'SCRIPT', 'A', '321', 'SCRIPT'])
+    })
+  })
+
+
+  it ('should recursively load multiple scripts in order', function() {
+    var ad = new R29.Fragment;
+    ad.capture();
+    document.write('123'
+    + '<script>var before = 1</script>'
+    + '<script src="Fixtures/cdn/ga.js"></script>'
+    + '666'
+    + '<script>var middle = 2; document.write(before)</script>'
+    + '<script>document.write("<script src=\\"Fixtures/doubleclick.net/script.js\\"></sc" + "ript>")</script>'
+    + '321'
+    + '<script>var after = 3</script>')
+    ad.evaluate()
+    waitsFor(function() {
+      return window.after
+    })
+    runs(function() {
+      expect(typeof _gat != 'undefined').toBe(true)
+      expect(middle).toBe(2)
+      expect(after).toBe(3)
+      expect(ad.map(function(e) {
+        return e.tagName || e.textContent
+      })).toEqual(['123', 'SCRIPT', 'SCRIPT', '666', 'SCRIPT', '1', 'SCRIPT', 'SCRIPT', 'before', 'SCRIPT', 'A', 'after', '321', 'SCRIPT'])
     })
   })
 

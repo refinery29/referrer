@@ -443,7 +443,8 @@ describe('Carousel', function() {
           waitsFor(function() {
             return !slideshow.scrolling
           });
-          runs(function() {expect(slideshow.element.scrollLeft).toBe(167 * 7 + 8 * 8 - 200)
+          runs(function() {
+            expect(slideshow.element.scrollLeft).toBe(167 * 7 + 8 * 8 - 200)
             slideshow.select('previous', true, 100)
           })
           waitsFor(function() {
