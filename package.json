@@ -12,6 +12,7 @@
       "ipad": [ 6 ]
     },
     "scripts": [
+      "Dependencies/Hammer.js",
       "Specs/Jasmine/Jasmine.js",
       "Specs/Jasmine/HTML.js",
       "Specs/Jasmine/Tap.js",

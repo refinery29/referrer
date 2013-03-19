@@ -154,7 +154,7 @@ R29.Fragment.prototype.execute = function(node, stack, callback) {
 // flushes current buffer
 R29.Fragment.prototype.flush = function() {
   var buffer = this.buffer;
-  delete this.buffer;
+  this.buffer = undefined;
   return buffer;
 };
 
