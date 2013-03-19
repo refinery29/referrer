@@ -99,7 +99,7 @@ if (typeof jasmine.TapReporter != 'undefined') {
 window.onload = function() {
   var preload = ['http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg']
   var preloaded = 0;
-  if (location.search.indexOf('preload') == -1)
+  if (location.search.indexOf('preload') == -1 && location.host.indexOf('testling') == -1)
     return jasmineEnv.execute();
 
   preload.forEach(function(src) {
