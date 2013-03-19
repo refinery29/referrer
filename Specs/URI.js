@@ -2,13 +2,13 @@ describe('R29.URI', function() {
   it('it should be location compatible', function() {
     var uri = R29.URI('http://user:password@something.domain.com/dir/file.ext?k=v#hash');
     var link = document.createElement('a');
-    link.href = 'http://user:password@something.domain.com/dir/file.ext?k=v#hash';
+    link.href = 'http://something.domain.com/dir/file.ext?k=v#hash';
     expect(uri.protocol).toBe('http:');
     expect(uri.protocol).toBe(link.protocol);
     expect(uri.host).toBe('something.domain.com');
-    expect(uri.host).toBe(link.host);
+    expect(uri.host).toBe(link.host.split(':')[0]);
     expect(uri.path).toBe('/dir/file.ext');
-    expect(uri.pathname).toBe(link.pathname);
+    expect(uri.pathname.replace(/^\//, '')).toBe(link.pathname.replace(/^\//, ''));
     expect(uri.search).toBe('?k=v');
     expect(uri.search).toBe(link.search);
     expect(uri.hash).toBe('#hash');
