@@ -37,7 +37,8 @@ R29.Storage = function(key, value, old, meta, prefix, storage, get, self, length
     }
     return !initial ? constructor : R29.Storage.initialize(constructor, true, key, value);
   }
-  if (!storage) 
+  var proto = storage && R29.Storage[storage].prototype;
+  if (!storage || (proto && proto.hasOwnProperty('adapter') && !proto.adapter)) 
     if (R29.Storage.Local.prototype.adapter)
       storage = 'Local';
     else if (R29.Storage.Indexed && R29.Storage.Indexed.prototype.database)
