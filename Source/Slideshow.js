@@ -3,7 +3,7 @@ Slideshow = function(element, options) {
     return new Slideshow(element);
   if (!element) return;
   this.element = element;
-  this.wrapper = element.getElementsByClassName('wrapper')[0];
+  this.wrapper = R29.getElementsByClassName(element, 'wrapper')[0];
   this.list = (this.wrapper || element).getElementsByTagName('ul')[0];
   this.items = [];
   this.images = [];
@@ -13,12 +13,12 @@ Slideshow = function(element, options) {
   this.descriptions = [];
   this.offsetWidths = [];
   this.offsetHeights = [];
-  this.choices = element.getElementsByClassName('choices')[0];
+  this.choices = R29.getElementsByClassName(element, 'choices')[0];
   this.scrollBarWidth = element.offsetHeight - element.clientHeight;
   this.menu = element.getElementsByTagName('menu')[0];
-  this.last = element.getElementsByClassName('final')[0];
+  this.last = R29.getElementsByClassName(element, 'final')[0];
   if (this.last)
-    this.lastWrapper = this.last.getElementsByClassName('wrapper')[0]
+    this.lastWrapper = R29.getElementsByClassName(this.last, 'wrapper')[0]
   if (options)
     for (var option in options)
       this[option] = options[option];
@@ -32,13 +32,13 @@ Slideshow = function(element, options) {
     this.className = element.className = element.className + ' ' + this.className
   else
     this.className = element.className;
-  if (this.choices) this.choice = this.choices.getElementsByClassName('selected')[0];
+  if (this.choices) this.choice = R29.getElementsByClassName(this.choices, 'selected')[0];
   for (var children = this.list.childNodes, i = 0, child; child = children[i++];) {
     if (child.tagName != 'LI') continue;
-    var picture = child.getElementsByClassName('picture')[0];
-    var meta = child.getElementsByClassName('meta')[0];
+    var picture = R29.getElementsByClassName(child, 'picture')[0];
+    var meta = R29.getElementsByClassName(child, 'meta')[0];
     this.metas.push(meta);
-    var description = child.getElementsByClassName('description')[0];
+    var description = R29.getElementsByClassName(child, 'description')[0];
     this.descriptions.push(description)
     var image = picture && picture.getElementsByTagName('img')[0];
     this.items.push(child);
@@ -411,7 +411,7 @@ Slideshow.prototype.more = function(element, sizing, gesture) {
     if (element.className.indexOf('expanded') == -1)
       element.className += ' expanded';
     var wrapper = meta.parentNode;
-    var mask = meta.getElementsByClassName('mask')[0];
+    var mask = R29.getElementsByClassName(meta, 'mask')[0];
     var computed = this.getComputedStyle(meta, 'minHeight', 'min-height');
     var offset = this.scrollBarWidth;
     var innerHeight = window.innerHeight
@@ -472,7 +472,7 @@ Slideshow.prototype.less = function(element, sizing, gesture) {
   if (meta) {
     var mobile = this.className.indexOf('mobile') > -1;
     var wrapper = meta.parentNode;
-    var mask = meta.getElementsByClassName('mask')[0];
+    var mask = R29.getElementsByClassName(meta, 'mask')[0];
     if (mask.className.indexOf('scrollable') > -1)
       mask.className = mask.className.replace(' scrollable', '');
     if (mask.scrollTop)

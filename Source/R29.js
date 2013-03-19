@@ -1,5 +1,19 @@
 if (!window.R29) R29 = {};
 
+R29.getElementsByClassName = function(element, name) {
+  if (element.getElementsByClassName)
+    return element.getElementsByClassName(name);
+  var elements = element.getElementsByTagName('*');
+  var re = new RegExp('(?:\s|^)' + name + '(?:\s|$)');
+  var result = [];
+  for (var i = 0, el; el = elements[i++];) {
+    var className = el.className;
+    if (!className || !className.match(re)) continue;
+    result.push(el)
+  }
+  return result;
+};
+
 // Copyright 2009-2012 by contributors, MIT License
 // vim: ts=4 sts=4 sw=4 expandtab
 

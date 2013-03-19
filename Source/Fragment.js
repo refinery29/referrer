@@ -147,7 +147,7 @@ R29.Fragment.prototype.execute = function(node, stack, callback) {
     this.capture(function() {
       // eval in global scope so var definitions set global variables
       // http://perfectionkills.com/global-eval-what-are-the-options/
-      (1, eval)(node.innerText);
+      (1, eval)(node.innerText || node.textContent);
     }, stack, node)
   }
 }

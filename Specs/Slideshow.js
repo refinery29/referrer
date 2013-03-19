@@ -27,7 +27,7 @@ var build = function(images, gap, limit) {
       item.style.height = '200px';
       item.style.width = '200px';
     }
-    item.style['float'] = item.style['floatCss'] = item.style['styleFloat'] = 'left';
+    item.style['float'] = item.style['cssFloat'] = item.style['styleFloat'] = 'left';
     list.appendChild(item); 
   }
   element.appendChild(list);
