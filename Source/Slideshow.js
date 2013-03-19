@@ -802,7 +802,8 @@ Slideshow.prototype.onResize = function(image) {
       maxItemHeight = maxThisHeight;
     if (picture) {
       var scaledWidth = Math.floor(Math.min(maxWidth, width, width / height * maxItemHeight))
-      var scaledHeight = Math.floor(scaledWidth / (width / height));
+      var scaledHeight = Math.ceil(scaledWidth / (width / height));
+      img.style.height = scaledHeight + 'px';
     } else {
       var scaledWidth =  Math.min(maxWidth/* - this.gap * 2*/, width);
       var scaledHeight = maxThisHeight//Math.min(height, maxItemHeight, maxHeight);
@@ -816,7 +817,7 @@ Slideshow.prototype.onResize = function(image) {
       item.style.width = actualWidth + 'px' // fontSize + 'em';
       if (picture) {
         picture.style.maxWidth = scaledWidth + 'px'
-        picture.style.paddingTop = Math.ceil(whitespace / 2) + 'px';
+        picture.style.paddingTop = Math.floor(whitespace / 2) + 'px';
         picture.style.paddingBottom = (this.excluding && this.offset || 0) + Math.ceil(whitespace / 2) + 'px';
       }
       if (picture) picture.style.minHeight = maxThisHeight - whitespace + 'px';
