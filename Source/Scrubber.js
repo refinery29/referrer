@@ -240,7 +240,7 @@ Scrubber.prototype.handle = function(x, y, event, force) {
     this.previous.handle(oX < 0 ? oX : null, oY < 0 ? oY : null, event, true)
   if (this.next && (oX > 0 || oY > 0))
     this.next.handle(oX > 0 ? oX : null, oY > 0 ? oY : null, event, true)
-}
+};
 
 Scrubber.prototype.get = function(property) {
   var val = this[property];
@@ -250,4 +250,4 @@ Scrubber.prototype.get = function(property) {
       this[property] = val;
   }
   return val;
-}
+};
