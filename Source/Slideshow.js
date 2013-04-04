@@ -510,7 +510,7 @@ Slideshow.prototype.placehold = function() {
   if (this.placeheld) return;
   var width = 0;
   this.placeheld = [];
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 4; i++) {
     var child = this.items[i];
     if (child) {
       this.placeheld.push(child);
@@ -687,10 +687,9 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       var width = this.scrollWidth;
       var offsetWidth = this.offsetWidth;
       var max = this.maxWidth || width - offsetWidth;
-      var scrollWidth = this.scrollWidth ? this.scrollWidth - (this.placeholding || 0) : width;
+      var scrollWidth = this.scrollWidth || width;
       var scroll = scrollWidth - offsetWidth;
       x = Math.min(x, scroll + window.innerWidth / 2)
-      console.log(x)
     }
     if (x != null) {
       element.scrollLeft = x;
