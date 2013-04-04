@@ -55,9 +55,10 @@ Slideshow = function(element, options) {
   }
   this.items[0].className += ' first';
   this.items[this.items.length - 1].className += ' last';
-  this.select(this.items[0]);
+  this.selected = this.items[0];
+  //this.select(this.items[0]);
   this.onResize()
-  this.scrollTo(0)
+  this.scrollTo(this.focusing ? this.selected : 0)
   this.attach();
 };
 Slideshow.prototype.attach = function() {
@@ -521,7 +522,7 @@ Slideshow.prototype.placehold = function() {
   }
   this.list.style.paddingLeft = width + 'px';
   this.placeholding = width;
-  this.scrollWidth = this.element.scrollWidth;
+  this.scrollWidth = (this.wrapper || this.element).scrollWidth;
   this.setVisibility();
   return width;
 };
@@ -686,9 +687,10 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       var width = this.scrollWidth;
       var offsetWidth = this.offsetWidth;
       var max = this.maxWidth || width - offsetWidth;
-      var scrollWidth = this.scrollWidth || width;
+      var scrollWidth = this.scrollWidth ? this.scrollWidth - (this.placeholding || 0) : width;
       var scroll = scrollWidth - offsetWidth;
       x = Math.min(x, scroll + window.innerWidth / 2)
+      console.log(x)
     }
     if (x != null) {
       element.scrollLeft = x;
