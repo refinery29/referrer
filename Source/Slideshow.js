@@ -516,10 +516,11 @@ Slideshow.prototype.placehold = function() {
       this.placeheld.push(child);
       this.list.appendChild(child)
       width += this.offsetWidths[i] + this.gap;
-      if (width + (i + 1) * this.gap >= this.offsetWidth)
+      if (width + this.gap >= this.offsetWidth)
         break;
     }
   }
+  console.error('placehold')
   this.list.style.paddingLeft = width + 'px';
   this.placeholding = width;
   this.scrollWidth = (this.wrapper || this.element).scrollWidth;
@@ -533,6 +534,7 @@ Slideshow.prototype.placeunhold = function() {
     this.list.insertBefore(child, this.items[j]);
   delete this.placeheld;
   delete this.placeholding;
+  console.error('placeunhold')
   this.scrollWidth = this.element.scrollWidth;
   this.setVisibility();
 };
@@ -619,10 +621,12 @@ Slideshow.prototype.setVisibility = function() {
 }
 Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) {
   if (x && x.nodeType) {
-    var win = window.innerWidth;
+    var win = Math.min(window.innerWidth, this.offsetWidth);
     var scroll = this.scrollWidth;
     var max = scroll - this.offsetWidth;
     var offset = x.offsetLeft;
+    if (x.offsetParent == this.element.offsetParent) 
+      offset -= this.element.offsetLeft;
     var width = x.offsetWidth;
     var left = offset - Math.round((this.offsetWidth - width) / 2);
     x = this.endless ? left : Math.round(Math.min(max, Math.max(left, 0)))
@@ -636,7 +640,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       if (!this.placeholding)
         placeholding -= this.gap
       if (x > placeholding) {
-        x -= placeholding;
+        x -= placeholding ;
       }
       if (x > placeholding - this.offsetWidth - window.innerWidth / 2) {
         this.placehold();
@@ -689,7 +693,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       var max = this.maxWidth || width - offsetWidth;
       var scrollWidth = this.scrollWidth || width;
       var scroll = scrollWidth - offsetWidth;
-      x = Math.min(x, scroll + window.innerWidth / 2)
+      x = Math.min(x, scroll + Math.min(window.innerWidth, offsetWidth) / 2)
     }
     if (x != null) {
       element.scrollLeft = x;

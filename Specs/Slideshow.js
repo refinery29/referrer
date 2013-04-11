@@ -641,4 +641,22 @@ describe('Carousel', function() {
       })
     })
   })
+
+  describe('wide carousel', function() {
+    it ('should warp around progressively', function() {
+      var element = build({
+        src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+        width: 280,
+        height: 335
+      })
+      element.style.width = '200px'
+      element.style.height = '335px'
+      document.body.appendChild(element)
+      var slideshow = new Carousel(element);
+      expect(slideshow.images[0].getAttribute('width')).toBe('280');
+      expect(slideshow.images[0].offsetWidth).toBe(200);
+      expect(slideshow.images[0].getAttribute('height')).toBe('335');
+      expect(slideshow.images[0].offsetHeight).toBe(240);
+    })
+  })
 })
