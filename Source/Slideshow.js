@@ -353,10 +353,11 @@ Slideshow.prototype.select = function(element, scroll, animate, gesture) {
       this.previousItem.className = this.previousItem.className.replace(' past', '');
     if (this.nextItem) 
       this.nextItem.className = this.nextItem.className.replace(' future', '');
+    var previous = this.selected;
     this.selected = element;
     element.className += ' selected';
     if (this.onSet) 
-      this.onSet(element, this.items.indexOf(element));
+      this.onSet(element, this.items.indexOf(element), previous);
     // element.style.height = 'auto';
     //this.crop(element);
     for (var prev = element.previousSibling; prev && prev.nodeType != 1;) 
@@ -506,37 +507,40 @@ Slideshow.prototype.fireEvent = function(event, action, label, data) {
 Slideshow.prototype.easing = function easing(p) {
   return 1 - Math.pow(1 - p, 3);
 }
-Slideshow.prototype.placehold = function() {
-  if (this.placeheld) return;
+Slideshow.prototype.placehold = function(x) {
   var width = 0;
-  this.placeheld = [];
-  for (var i = 0; i < 4; i++) {
+  var placeheld = (this.placeheld || (this.placeheld = []));
+  for (var i = this.items.length; i-- && (width < x);) {
     var child = this.items[i];
-    if (child) {
-      this.placeheld.push(child);
-      this.list.appendChild(child)
-      width += this.offsetWidths[i] + this.gap;
-      if (width + this.gap >= this.offsetWidth)
-        break;
+    if (placeheld.indexOf(child) == -1) {
+      placeheld.push(child)
+      child.style.position = 'absolute';
+      child.classList.add('placeheld');
     }
+    width += this.offsetWidths[i] + this.gap;
   }
-  console.error('placehold')
-  this.list.style.paddingLeft = width + 'px';
-  this.placeholding = width;
-  this.scrollWidth = (this.wrapper || this.element).scrollWidth;
-  this.setVisibility();
+  if (this.placeholding != width) {
+    this.list.style.paddingLeft = width + 'px';
+    this.list.style.width = (this.scrollWidth - width) + 'px'
+    var left = 0;
+    var difference = this.placeholding - width;
+    for (var i = placeheld.length, child; child = placeheld[--i];) {
+      var offsetWidth = this.offsetWidths[this.items.indexOf(child)];
+      if (difference > offsetWidth) {
+        difference -= offsetWidth + this.gap;
+        placeheld.pop();
+        child.classList.remove('placeheld'); 
+        child.style.position = 'static';
+        child.style.left = 'auto';
+      } else {
+        child.style.left = left + 'px';
+        left += this.gap;
+        left += offsetWidth;
+      }
+    }
+    this.placeholding = width;
+  }
   return width;
-};
-Slideshow.prototype.placeunhold = function() {
-  var width = 0;
-  this.list.style.paddingLeft = '0px';
-  for (var j = this.placeheld.length, i = 0, child; child = this.placeheld[i++];)
-    this.list.insertBefore(child, this.items[j]);
-  delete this.placeheld;
-  delete this.placeholding;
-  console.error('placeunhold')
-  this.scrollWidth = this.element.scrollWidth;
-  this.setVisibility();
 };
 Slideshow.prototype.setOffset = function(element, value, property) {
   var property = this.property;
@@ -555,7 +559,7 @@ Slideshow.prototype.setOffset = function(element, value, property) {
   return true;
 }
 Slideshow.prototype.setVisibility = function() {
-  var scrollLeft = this.element.scrollLeft - (this.placeholding || 0);
+  var scrollLeft = this.element.scrollLeft - this.placeholding;
   var screenWidth = window.innerWidth;
   var left = 0;
   var result = [];
@@ -619,37 +623,44 @@ Slideshow.prototype.setVisibility = function() {
     } 
   }
 }
+Slideshow.prototype.getXByItem = function(item) {
+  var x = 0;
+  for (var i = 0, other; (other = this.items[i]) != item; i++)
+    x += this.offsetWidths[i] + this.gap;
+  return x;
+}
 Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) {
+  var win = Math.min(window.innerWidth, this.offsetWidth);
+  var scroll = this.scrollWidth;
+  var max = scroll - this.offsetWidth //- win /2 //+ this.offsetWidths[this.offsetWidths.length - 1];
   if (x && x.nodeType) {
-    var win = Math.min(window.innerWidth, this.offsetWidth);
-    var scroll = this.scrollWidth;
-    var max = scroll - this.offsetWidth;
-    var offset = x.offsetLeft;
-    if (x.offsetParent == this.element.offsetParent) 
-      offset -= this.element.offsetLeft;
-    var width = x.offsetWidth;
-    var left = offset - Math.round((this.offsetWidth - width) / 2);
+    var offset = this.getXByItem(x);
+    var current = this.getXByItem(this.selected)
+    var offsetWidth = x.offsetWidth;
+    // if it's faster to go over the limits than rewind back
+    if (current - offset >= scroll - current + offsetWidth) {
+      offset = current + scroll - current;
+    } 
+    // if it's faster to go back through the beginning than go forward
+    if (offset - current > current + scroll - offset) {
+      offset = - scroll + offset;
+    }
+    if (this.placeholding && offset > 0) {
+      offset = current - (current - offset)
+    }
+    var left = offset - Math.round((this.offsetWidth - offsetWidth) / 2);
     x = this.endless ? left : Math.round(Math.min(max, Math.max(left, 0)))
+    console.error(this.scrollLeft, x)
   }
   if (!smooth && this.endless) {
-    var placeholding = this.scrollWidth - (this.placeholding || 0);
-    if (x <= 0) {
-      this.placehold();
-      x += placeholding;
+    if (x > max) {
+      var rewind = this.offsetWidth - (x - max);
+      this.placehold(rewind);
+      x = this.placeholding - rewind// (x - max)
     } else {
-      if (!this.placeholding)
-        placeholding -= this.gap
-      if (x > placeholding) {
-        x -= placeholding ;
-      }
-      if (x > placeholding - this.offsetWidth - window.innerWidth / 2) {
-        this.placehold();
-      } else if (this.placeheld) {
-        if (x < placeholding - this.offsetWidth || x > placeholding) {
-          this.placeunhold();
-        }
-      }
+      x += this.placehold(Math.max(0, - x));
     }
+    console.error('placeholding', this.placeholding, rewind)
   }
   cancelAnimationFrame(this.scrolling);
   delete this.scrolling
@@ -661,8 +672,6 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     var fromY = element.scrollTop;
     var start = (new Date).getTime();
     var self = this;
-    var maxX = this.scrollWidth - this.offsetWidth;
-    x = Math.min(x, maxX);
     var fn = function(){
       var time = new Date;
       var diff = time - start;
@@ -688,14 +697,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       self.busy = true;
   } else {
     if (x != null) {
-      var width = this.scrollWidth;
-      var offsetWidth = this.offsetWidth;
-      var max = this.maxWidth || width - offsetWidth;
-      var scrollWidth = this.scrollWidth || width;
-      var scroll = scrollWidth - offsetWidth;
-      x = Math.min(x, scroll + Math.min(window.innerWidth, offsetWidth) / 2)
-    }
-    if (x != null) {
+      console.log('scrollLeft', x, this.placeholding)
       element.scrollLeft = x;
       if (element == this.element) 
         this.scrollLeft = x;
@@ -731,6 +733,7 @@ Slideshow.prototype.shifting = (location.search.match(/shifting=([^&]+)/i) || [0
 Slideshow.prototype.clicking = (location.search.match(/clicking=([^&]+)/i) || [0,'false'])[1] != 'false';
 Slideshow.prototype.centering = (location.search.match(/centering=([^&]+)/i) || [0,false])[1] != 'false';
 Slideshow.prototype.excluding = (location.search.match(/excluding=([^&]+)/i) || [0,true])[1] != 'false';
+Slideshow.prototype.placeholding = 0;
 Slideshow.prototype.inline = true;
 Slideshow.prototype.className = 
   unescape((location.search.match(/class=([^&]+)/i) || [0,''])[1]) + ' ' +
@@ -860,7 +863,7 @@ Slideshow.prototype.onResize = function(image) {
     
   
   //if (this.selected && (!image || !image.nodeType || image == this.selected)) this.crop(this.selected)
-  this.list.style.width = total + 'px' // / 16 + 'em';
+  this.list.style.width = (total - this.placeholding) + 'px' // / 16 + 'em';
   this.offsetWidth = this.element.offsetWidth //innerWidth;
   this.scrollWidth = this.element.scrollWidth;
   this.setVisibility();
@@ -883,10 +886,11 @@ Slideshow.prototype.getItemByX = function(x) {
 
 Slideshow.prototype.onScroll = function(e) {
   var self = this;
-  var left = this.element.scrollLeft;
-  var x = left;
+  var left = this.element.scrollLeft - this.placeholding;
   var width = window.innerWidth;
   var max = this.maxWidth || this.scrollWidth - this.offsetWidth;
+  if (left < 0) left += max;
+  var x = left; 
   if (!this.endless) if (x >= max) {
     if (!this.finished) {
       this.finished = true;
@@ -922,7 +926,7 @@ Slideshow.prototype.getViewportOffsetX = function(x) {
   var scroll = this.scrollWidth;
   var offsetWidth = this.offsetWidth;
   var total = scroll - offsetWidth;
-  var width = window.innerWidth;
+  var width = Math.min(offsetWidth, window.innerWidth);
   if (x < width / 4) 
     return x + 3
   else if (!this.endless && total - x < width / 3) {
