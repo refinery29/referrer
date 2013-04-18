@@ -319,9 +319,8 @@ Slideshow.prototype.repeat = function() {
 Slideshow.prototype.getRelativeItem = function(diff) {
   var items = this.items;
   var index = items.indexOf(this.selected);
-  var i = index + diff;
-  var item = items[i] || items[(this.endless && (diff > 0 ? i % items.length : i + items.length))];
-  console.log('select', index, items.indexOf(item))
+  var i = index + diff, j = items.length;
+  var item = items[i] || this.endless && items[diff > 0 ? i % j : i + j];
   return item;
 }
 Slideshow.prototype.select = function(element, scroll, animate, gesture) {
@@ -645,15 +644,16 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
     var offset = this.getXByItem(x);
     var current = this.getXByItem(this.selected)
     var offsetWidth = x.offsetWidth;
-    // if it's faster to go over the limits than rewind back
-    if (current - offset >= scroll - current + offsetWidth) {
-      offset = offset + scroll;
-    } 
-    // if it's faster to go back through the beginning than go forward
-    if (offset - current > current + scroll - offset) {
-      offset = - scroll + offset;
-    } else if (this.placeholding && current > offset) {
-      offset = - scroll + offset;
+    if (this.endless) {
+      // if it's faster to go back through the beginning than go forward
+      if (offset - current > current + scroll - offset) {
+        offset -= scroll;
+      // if it's faster to go over the limits than rewind back
+      } else if (current - offset >= scroll - current + offsetWidth + offset) {
+        offset += scroll;
+      } else if (this.placeholding && current > offset) {
+        offset -= scroll;
+      }
     }
     var left = offset - Math.round((this.offsetWidth - offsetWidth) / 2);
     x = this.endless ? left : Math.round(Math.min(max, Math.max(left, 0)))
@@ -692,7 +692,6 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       var diff = time - start;
       var progress = Math.min(1, diff / duration);
       if (reverse) progress = 1 - progress;
-      console.error([x, fromX, self.placeholding])
       self.scrollTo(
         x == null ? x : Math.round(fromX + (x - fromX) * self.easing(progress)),
         y == null ? y : Math.round(fromY + (y - fromY) * self.easing(progress)),
@@ -907,31 +906,16 @@ Slideshow.prototype.getItemByX = function(x) {
 
 Slideshow.prototype.onScroll = function(e) {
   var self = this;
-  var left = this.element.scrollLeft - this.placeholding;
+  var left = this.element.scrollLeft;
   var width = window.innerWidth;
   var max = this.maxWidth || this.scrollWidth - this.offsetWidth;
   if (left < 0) left += max;
-  var x = left; 
-  if (!this.endless) if (x >= max) {
-    if (!this.finished) {
-      this.finished = true;
-      this.fireEvent('finish')
-      this.element.className = (this.className += ' finished');
-    }
-  } else {
-    if (this.finished) {
-      delete this.finished;
-      this.element.className = this.className = this.className.replace(' finished', '');
-      this.scrollTo(null, 0);
-    }
-  }
   if (this.resized  || this.clicked) return;
   if (this.blocking)
     return delete this.blocking;
-  x += this.getViewportOffsetX(x)
+  left += this.getViewportOffsetX(left)
   if (this.clicked) return;
-  console.error('select', x)
-  this.select(x, false);
+  this.select(left, false);
   this.setVisibility();
 };
 
@@ -939,15 +923,14 @@ Slideshow.prototype.getViewportOffsetX = function(x) {
   var scroll = this.scrollWidth;
   var offsetWidth = this.offsetWidth;
   var total = scroll - offsetWidth;
-  var width = Math.min(offsetWidth, window.innerWidth);
   if (this.endless)
-    return width / 2;
-  if (x < width / 4) 
+    return offsetWidth / 2;
+  if (x < offsetWidth / 4) 
     return x + 3
-  else if (total - x < width / 3) {
-    return width * 0.8 - (total - x)
+  else if (total - x < offsetWidth / 3) {
+    return offsetWidth * 0.8 - (total - x)
   } else
-    return width / 2
+    return offsetWidth / 2
 }
 
 Slideshow.prototype.onClick = function(e, gesture) {
