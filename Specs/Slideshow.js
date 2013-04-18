@@ -795,51 +795,52 @@ describe('Carousel', function() {
       expect(slideshow.images[0].getAttribute('height')).toBe('335');
       expect(slideshow.images[0].offsetHeight).toBe(335);
       expect(slideshow.scrollLeft).toBe(0)
-      slideshow.scrollTo(-100)
-      expect(slideshow.scrollLeft).toBe(280 - 100)
-      expect(slideshow.placeholding).toBe(280)
-      expect(slideshow.items[6].style.left).toBe('0px');
-      slideshow.scrollTo(-280)
-      expect(slideshow.scrollLeft).toBe(280 - 280)
-      expect(slideshow.placeholding).toBe(280)
-      expect(slideshow.items[6].style.left).toBe('0px');
-      slideshow.scrollTo(-280 - 100)
-      expect(slideshow.scrollLeft).toBe(280 - 100)
-      expect(slideshow.placeholding).toBe(280 * 2)
-      expect(slideshow.items[6].style.left).toBe('280px');
-      expect(slideshow.items[5].style.left).toBe('0px');
-      slideshow.scrollTo(-280)
-      expect(slideshow.scrollLeft).toBe(280 - 280)
-      expect(slideshow.placeholding).toBe(280)
-      expect(slideshow.items[6].style.left).toBe('0px');
-      expect(slideshow.items[5].style.left).toBe('auto');
-      slideshow.scrollTo(0)
-      expect(slideshow.scrollLeft).toBe(0)
-      expect(slideshow.placeholding).toBe(0)
-      expect(slideshow.items[6].style.left).toBe('auto');
-      expect(slideshow.items[5].style.left).toBe('auto');
-      slideshow.scrollTo(560);
-      expect(slideshow.scrollLeft).toBe(560)
-      expect(slideshow.placeholding).toBe(0)
-      expect(slideshow.items[6].style.left).toBe('auto');
-      expect(slideshow.items[5].style.left).toBe('auto');
-      slideshow.scrollTo(660);
-      expect(slideshow.scrollLeft).toBe(100)
-      expect(slideshow.placeholding).toBe(1400)
-      expect(slideshow.items[6].style.left).toBe(280 * 4 + 'px');
-      expect(slideshow.items[5].style.left).toBe(280 * 3 + 'px');
-      expect(slideshow.items[4].style.left).toBe(280 * 2 + 'px');
-      expect(slideshow.items[3].style.left).toBe(280 * 1 + 'px');
-      expect(slideshow.items[2].style.left).toBe(280 * 0 + 'px');
-      expect(slideshow.items[1].style.left).toBe('');
-      slideshow.scrollTo(860);
-      expect(slideshow.items[6].style.left).toBe(280 * 3 + 'px');
-      expect(slideshow.items[5].style.left).toBe(280 * 2 + 'px');
-      expect(slideshow.items[4].style.left).toBe(280 * 1 + 'px');
-      expect(slideshow.items[3].style.left).toBe(280 * 0 + 'px');
-      expect(slideshow.items[2].style.left).toBe('auto');
-      expect(slideshow.scrollLeft).toBe(20)
-      expect(slideshow.placeholding).toBe(1120)
+      //slideshow.scrollTo(-100)
+      //expect(slideshow.scrollLeft).toBe(280 - 100)
+      //expect(slideshow.placeholding).toBe(280)
+      //expect(slideshow.items[6].style.left).toBe('0px');
+      //slideshow.scrollTo(-280)
+      //expect(slideshow.scrollLeft).toBe(280 - 280)
+      //expect(slideshow.placeholding).toBe(280)
+      //expect(slideshow.items[6].style.left).toBe('0px');
+      //slideshow.scrollTo(-280 - 100)
+      //expect(slideshow.scrollLeft).toBe(280 - 100)
+      //expect(slideshow.placeholding).toBe(280 * 2)
+      //expect(slideshow.items[6].style.left).toBe('280px');
+      //expect(slideshow.items[5].style.left).toBe('0px');
+      //slideshow.scrollTo(-280)
+      //expect(slideshow.scrollLeft).toBe(280 - 280)
+      //expect(slideshow.placeholding).toBe(280)
+      //expect(slideshow.items[6].style.left).toBe('0px');
+      //expect(slideshow.items[5].style.left).toBe('auto');
+      //slideshow.scrollTo(0)
+      //expect(slideshow.scrollLeft).toBe(0)
+      //expect(slideshow.placeholding).toBe(0)
+      //expect(slideshow.items[6].style.left).toBe('auto');
+      //expect(slideshow.items[5].style.left).toBe('auto');
+      //slideshow.scrollTo(560);
+      //expect(slideshow.scrollLeft).toBe(560)
+      //expect(slideshow.placeholding).toBe(0)
+      //expect(slideshow.items[6].style.left).toBe('auto');
+      //expect(slideshow.items[5].style.left).toBe('auto');
+      //slideshow.scrollTo(660);
+      //expect(slideshow.scrollLeft).toBe(100)
+      //expect(slideshow.placeholding).toBe(1400)
+      //expect(slideshow.items[6].style.left).toBe(280 * 4 + 'px');
+      //expect(slideshow.items[5].style.left).toBe(280 * 3 + 'px');
+      //expect(slideshow.items[4].style.left).toBe(280 * 2 + 'px');
+      //expect(slideshow.items[3].style.left).toBe(280 * 1 + 'px');
+      //expect(slideshow.items[2].style.left).toBe(280 * 0 + 'px');
+      //expect(slideshow.items[1].style.left).toBe('');
+      //slideshow.scrollTo(860);
+      //expect(slideshow.items[6].style.left).toBe(280 * 3 + 'px');
+      //expect(slideshow.items[5].style.left).toBe(280 * 2 + 'px');
+      //expect(slideshow.items[4].style.left).toBe(280 * 1 + 'px');
+      //expect(slideshow.items[3].style.left).toBe(280 * 0 + 'px');
+      //expect(slideshow.items[2].style.left).toBe('auto');
+      //expect(slideshow.scrollLeft).toBe(20)
+      //expect(slideshow.placeholding).toBe(1120)
+      expect(1).toBe(2)
     })
   })
 })
