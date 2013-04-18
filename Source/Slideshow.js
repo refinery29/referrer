@@ -316,9 +316,9 @@ Slideshow.prototype.close = function(e, gesture) {
 Slideshow.prototype.repeat = function() {
   this.select(this.items[0]);
 }
-Slideshow.prototype.getRelativeItem = function(diff) {
+Slideshow.prototype.getRelativeItem = function(diff, origin) {
   var items = this.items;
-  var index = items.indexOf(this.selected);
+  var index = items.indexOf(origin || this.selected);
   var i = index + diff, j = items.length;
   var item = items[i] || this.endless && items[diff > 0 ? i % j : i + j];
   return item;
@@ -354,27 +354,25 @@ Slideshow.prototype.select = function(element, scroll, animate, gesture) {
     gesture = this.items.indexOf(element) < this.selectedIndex ? 'scrollright' : 'scrollleft'
   if (this.selected != element) { 
     if (this.selected) 
-      this.selected.className = this.selected.className.replace(' selected', '');
+      this.selected.classList.remove('selected');
     this.selectedIndex = this.items.indexOf(element)
     if (this.previousItem) 
-      this.previousItem.className = this.previousItem.className.replace(' past', '');
+      this.previousItem.classList.remove('past');
     if (this.nextItem) 
-      this.nextItem.className = this.nextItem.className.replace(' future', '');
+      this.nextItem.classList.remove('future');
     var previous = this.selected;
     this.selected = element;
-    element.className += ' selected';
+    element.classList.add('selected');
     if (this.onSet) 
       this.onSet(element, this.items.indexOf(element), previous);
     // element.style.height = 'auto';
     //this.crop(element);
-    for (var prev = element.previousSibling; prev && prev.nodeType != 1;) 
-      prev = prev.previousSibling;
-    for (var next = element.nextSibling; next && next.nodeType != 1;) 
-      next = next.nextSibling;
+    var prev = this.getRelativeItem(-1, element);
+    var next = this.getRelativeItem(+1, element);
     if (prev && this.previousItem != prev) 
-      (this.previousItem = prev).className += ' past';
+      (this.previousItem = prev).classList.add('past');
     if (next && this.nextItem != next) 
-      (this.nextItem = next).className += ' future';
+      (this.nextItem = next).classList.add('future');
     if (this.expanded && this.expanded != this.selected) {
       this.less(this.expanded);
       if (this.keep) this.more(this.selected);
