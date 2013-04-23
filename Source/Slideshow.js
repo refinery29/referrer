@@ -336,6 +336,7 @@ Slideshow.prototype.select = function(element, scroll, animate, gesture) {
           return;
       break;
     default:
+      if (!element) return;
       if (typeof element == 'number') {
         element = this.getItemByX(element);
       }
@@ -509,9 +510,6 @@ Slideshow.prototype.less = function(element, sizing, gesture) {
 Slideshow.prototype.fireEvent = function(event, action, label, data) {
 
 };
-Slideshow.prototype.easing = function easing(p) {
-  return 1 - Math.pow(1 - p, 3);
-}
 Slideshow.prototype.placehold = function(x) {
   var width = 0;
   var placeheld = (this.placeheld || (this.placeheld = []));
@@ -673,7 +671,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
   delete this.busy;
   if (!element) element = this.element;
   if (smooth) {
-    var duration = typeof smooth == 'number' ? smooth : 300;
+    var duration = typeof smooth == 'number' ? smooth : this.duration;
     var fromX = this.scrollLeft;
     if (this.placeholding && offset)
       fromX = - this.placeholding + fromX;
@@ -690,9 +688,14 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       var diff = time - start;
       var progress = Math.min(1, diff / duration);
       if (reverse) progress = 1 - progress;
+      var easing = self.easing;
+      if (typeof easing == 'string') {
+        easing = (self.timings[easing] || (self.timings[easing] 
+               = self.bezier.apply(self, self.easings[easing])))
+      }
       self.scrollTo(
-        x == null ? x : Math.round(fromX + (x - fromX) * self.easing(progress)),
-        y == null ? y : Math.round(fromY + (y - fromY) * self.easing(progress)),
+        x == null ? x : Math.round(fromX + (x - fromX) * easing(progress, duration)),
+        y == null ? y : Math.round(fromY + (y - fromY) * easing(progress, duration)),
         null,
         manual,
         element,
@@ -1051,3 +1054,43 @@ Carousel.prototype.endless = true;
             clearTimeout(id);
         };
 }());
+
+Slideshow.prototype.bezier = function(p1x,p1y,p2x,p2y) {
+  var ax=0,bx=0,cx=0,ay=0,by=0,cy=0;
+  // `ax t^3 + bx t^2 + cx t' expanded using Horner's rule.
+      function sampleCurveX(t) {return ((ax*t+bx)*t+cx)*t;};
+      function sampleCurveY(t) {return ((ay*t+by)*t+cy)*t;};
+      function sampleCurveDerivativeX(t) {return (3.0*ax*t+2.0*bx)*t+cx;};
+  // The epsilon value to pass given that the animation is going to run over |dur| seconds. The longer the
+  // animation, the more precision is needed in the timing function result to avoid ugly discontinuities.
+  function solveEpsilon(duration) {return 1.0/(200.0*duration);};
+      function solve(x,epsilon) {return sampleCurveY(solveCurveX(x,epsilon));};
+  // Given an x value, find a parametric value it came from.
+      function solveCurveX(x,epsilon) {var t0,t1,t2,x2,d2,i;
+    function fabs(n) {if(n>=0) {return n;}else {return 0-n;}}; 
+          // First try a few iterations of Newton's method -- normally very fast.
+          for(t2=x, i=0; i<8; i++) {x2=sampleCurveX(t2)-x; if(fabs(x2)<epsilon) {return t2;} d2=sampleCurveDerivativeX(t2); if(fabs(d2)<1e-6) {break;} t2=t2-x2/d2;}
+          // Fall back to the bisection method for reliability.
+          t0=0.0; t1=1.0; t2=x; if(t2<t0) {return t0;} if(t2>t1) {return t1;}
+          while(t0<t1) {x2=sampleCurveX(t2); if(fabs(x2-x)<epsilon) {return t2;} if(x>x2) {t0=t2;}else {t1=t2;} t2=(t1-t0)*.5+t0;}
+          return t2; // Failure.
+      };
+  return function(t, duration) {
+    // Calculate the polynomial coefficients, implicit first and last control points are (0,0) and (1,1).
+    cx=3.0*p1x; bx=3.0*(p2x-p1x)-cx; ax=1.0-cx-bx; cy=3.0*p1y; by=3.0*(p2y-p1y)-cy; ay=1.0-cy-by;
+  
+    // Convert from input time to parametric value in curve, then from that to output time.
+    return solve(t, solveEpsilon(duration || 1));
+  }
+};
+
+Slideshow.prototype.easings = {
+  'ease': [0.25, 0.1, 0.25, 0.1],
+  'ease-in': [0.42, 0, 1, 1],
+  'ease-out': [0, 0, 0.58, 1],
+  'ease-in-out': [0.42, 0, 0.58, 1],
+  'linear': [0, 0, 1, 1]
+}
+Slideshow.prototype.timings = {};
+Slideshow.prototype.duration = 400;
+Slideshow.prototype.easing = 'ease-out';
