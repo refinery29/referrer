@@ -67,8 +67,8 @@ R29.URI.prototype.toString = function(object) {
   return url;
 };
 
-R29.URI.prototype.fromQueryString = function(value) {
-  var data = {};
+R29.URI.prototype.fromQueryString = function(value, data) {
+  if (!data) data = {};
   for (var pair, bits, pairs = value.split('&'), i = 0, j = pairs.length; i < j; i++) {
     pair = pairs[i].split('=');
     var name = pair[0], val = pair[1];
