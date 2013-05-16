@@ -3,8 +3,8 @@ Slideshow = function(element, options) {
     return new Slideshow(element);
   if (!element) return;
   this.element = element;
-  this.wrapper = R29.getElementsByClassName(element, 'wrapper')[0];
-  this.list = (this.wrapper || element).getElementsByTagName('ul')[0];
+  this.wrapper = R29.getElementsByClassName(element, 'wrapper')[0] || element;
+  this.list = this.wrapper.getElementsByTagName('ul')[0];
   this.items = [];
   this.images = [];
   this.extras = [];
@@ -29,9 +29,9 @@ Slideshow = function(element, options) {
     }, false);
   if (this.menu) this.menu.style.marginBottom = this.scrollBarWidth + 'px'
   if (this.className)
-    this.className = element.className = element.className + ' ' + this.className
+    this.className = this.wrapper.className = this.wrapper.className + ' ' + this.className
   else
-    this.className = element.className;
+    this.className = el.wrapperement.className;
   if (this.choices) this.choice = R29.getElementsByClassName(this.choices, 'selected')[0];
   for (var children = this.list.childNodes, i = 0, child; child = children[i++];) {
     if (child.tagName != 'LI') continue;
@@ -64,7 +64,7 @@ Slideshow = function(element, options) {
 Slideshow.prototype.attach = function() {
 
   var self = this;
-  var element = this.element;
+  var element = this.wrapper;
   this.hammer = hammer = new Hammer(this.inline ? element : document.body, {
     swipe: false,
     hold: false,
@@ -84,220 +84,68 @@ Slideshow.prototype.attach = function() {
   element.onscroll = function(e) {
     return self.onScroll(e)
   }
+  element.onmousedown = function(event) {
+    //if (event.target.tagName == 'IMG')
+      event.preventDefault();
+  }
+  element.onclick = function(event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
 
   hammer.ondragstart = function(event) {
     cancelAnimationFrame(self.scrolling);
     delete self.scrolling
     delete self.busy;
-    delete self.inertiaY;
-    self.onTouch(event.originalEvent);
-    for (var el = event.originalEvent.target; el; el = el.parentNode)
+    event.preventDefault();
+    self.onTouch(event);
+    for (var el = event.target; el; el = el.parentNode)
       if (el == element) break;
     if (!el) return;
     if (self.onDragStart) self.onDragStart(event);
-    hammer.left = element.scrollLeft;
-    hammer.top = element.scrollTop;
-    hammer.dragStart = new Date();
-    hammer.selected = self.selected;
-    hammer.speed = 0;
-    self.dragging = true;
-    var touch = event.touches[0]
-    var target = event.originalEvent.target
-    for (var el = target; el && el.id != 'container' && el != self.list && el != self.wrapper && el != self.element; el = el.parentNode) {
-      if (el.scrollHeight > el.offsetHeight && (el != self.element) && el.className.indexOf('unscrollable') == -1) {
-        self.scrolled = el;
-        self.scrollsY = [];
-        self.elementScrollTop = self.scrolled.scrollTop;
-        break;
-      } else if (el.tagName == 'LI')
-        var li = el;
-    }
+    self.scrollLeftStart = self.scrollLeft - self.placeholding;
   }
   hammer.onhold = function(event) {
-    self.onTouch(event.originalEvent);      
-    for (var target = event.originalEvent.target; target; target = target.parentNode) {
+    self.onTouch(event);      
+    for (var target = event.target; target; target = target.parentNode) {
       if (target.className && target.className.indexOf('meta') > -1) {
         self.less(self.selected, 'hold')
         return;
         break;
       }
-    }  
-    return self.onClick(event.originalEvent, 'hold')
+    }
+    return self.onClick(event, 'hold')
   }
 
   hammer.ontap = function(event) {
-    self.onTouch(event.originalEvent);
-    return self.onClick(event.originalEvent, 'tap')
+    self.onTouch(event);
+    return self.onClick(event, 'tap')
   }
 
   hammer.ondrag = function(event) {
-    if (!hammer.dragStart) return;
     if (self.onDrag) self.onDrag(event);
-    var touch = event.touches[0]
-    var direction = hammer.direction || event.subdirection || event.direction;
-    var directionY = hammer.directionY || event.directionY || direction;
-    var directionX = hammer.directionX || event.directionX || direction;
-    var now = new Date;
-    var diff = (now - (hammer.lastDragTime || hammer.dragStart)) / 1000;
-    if (diff > 0.25)
-      diff = - diff + 0.25
-    if (diff > - 0.25)
-      hammer.speed = Math.max(0, hammer.speed + Math.abs(event.distance - (hammer.lastDragDistance || 0)) * 25 * diff)
-    else
-      hammer.speed = 0;
-    hammer.lastDragTime = now;
-    hammer.lastDragDistance = event.distance;
-    var dX = event.distanceX;
-    if (!hammer.direction || (hammer.direction != 'up' && hammer.direction != 'down')) {
-      if (self.swiped == null && (Math.abs(event.distanceX) > self.snap || self.swiping)) {
-        if (!self.swiping)
-          self.swiping = direction == 'left' ? self.snap : - self.snap;
-        var dX = event.distanceX + self.swiping;
-        var left = hammer.left - dX * self.speedup;
-        if (!self.endless) left = Math.max(left, 0);
-        event.originalEvent.preventDefault()
-        return self.scrollTo(left, null, false, true);
-      };
-    }
-    var dY = event.distanceY;
-    if (Math.abs(dY) <= self.snap && self.swiped == null && hammer.up == null) return;
-    var mobile = self.className.indexOf('mobile') > -1;
-    if (hammer.index == null) {
-      for (var el = event.originalEvent.target; el; el = el.parentNode) {
-        var index = self.items.indexOf(el);
-        if (index > -1) break;
-      }
-      var metaChild = self.metas[index];
-      if (metaChild) {
-        var meta = metaChild.parentNode;
-        hammer.meta = meta;
-        hammer.picture = el;
-        if (self.expanded != el) {
-          if (self.expanded) self.less(self.expanded)
-          self.more(el, 'fast');
-        }
-        hammer.offsetHeight = meta.offsetHeight;
-        hammer.marginTop = self.expanded == el ? - hammer.offsetHeight : - self.offset;
-      } else if (!self.scrolled) return;
-      hammer.up = dY < 0;
-      hammer.index = index;
-    }
-    dY += hammer.up ? self.snap : - self.snap
-    if (hammer.meta) {
-      if (direction == 'up' || direction == 'down')
-        hammer.direction = direction;
-      var minY = hammer.offsetHeight;
-      hammer.distanceY = Math.min(minY, - dY)// * minY;
-      var now = hammer.marginTop - hammer.distanceY + (mobile ? 0 : self.gap);
-      var max = - minY + (mobile ? 0 : self.gap);
-      var min = - self.offset + (mobile ? 0 : self.gap) - 1;
-      var lim = Math.min(min, Math.max(max, now));
-    } 
-    if (self.scrolled) {
-      var scrollY = self.elementScrollTop - dY;
-      // keep 5 last movements
-      if (self.scrollsY.push(scrollY) == 6)
-        self.scrollsY.shift();
-      if (scrollY >= 0 && (lim == max || !hammer.meta || hammer.meta.style.marginTop == max + 'px')) {
-        self.scrolled.scrollTop = scrollY;
-        lim = max
-        self.swiped = self.scrollsY;
-      } else {
-        self.scrolled.scrollTop = self.scrollY = 0;
-        lim -= self.elementScrollTop
-        self.swiped = true;
-      } 
-    } 
-    if (!hammer.meta) return;
-    if (hammer.picture != el)
-      self.select(hammer.picture, true, false)
-    if (hammer.picture.className.indexOf('minimal') == -1) {
-      if (self.collapsing == hammer.picture) {
-        clearTimeout(self.collapsingTimeout)
-        delete self.collapsing;
-      }
-      hammer.offset = lim;
-      self.setOffset(hammer.meta, lim)
-      event.originalEvent.preventDefault()
+    event.preventDefault()
+    console.log(event, event.velocity)
+    if (event.deltaX) {
+      self.scrollTo(self.scrollLeftStart - event.deltaX)
     }
   }
   
-  hammer.ondragend = function(e) {
-    if (!hammer.dragStart) return;
+  hammer.ondragend = function(event) {
     if (self.onDragEnd)
       self.onDragEnd(event);
-    if (self.swiped && self.swiped !== true) {
-      var speed = 0;
-      for (var history = self.swiped, i = 0, j = history.length, scroll; i < j; i++) {
-        if (scroll != null) {
-          speed += (history[i] - scroll)
-        }
-        scroll = history[i];
-      }
-      speed /= j;
-      var diff = speed * 10;
-      self.inertiaY = diff;
-      self.busy = true;
-      self.scrollTo(null, self.scrolled.scrollTop + diff, 1000, null, self.scrolled);
-    } else {
-      var distance = Math.abs(e.distance) * self.speedup;
-      if (distance < self.snap) {
-        self.onClick(e.originalEvent, 'tinydrag');
-      } else {
-        if (hammer.meta) {
-          if (hammer.marginTop > -35
-          ? hammer.offset - hammer.marginTop < - 25 
-          : hammer.offset - hammer.marginTop < 25) {
-            self.more(hammer.picture, null, 'swipe')
-          } else {
-            self.less(hammer.picture, null, 'swipe')
-          }
-        }
-        var direction = hammer.direction || e.direction;
-        if (self.swiping) {
-          direction = e.distanceX > 0 ? 'right' : 'left';
-          distance = Math.abs(e.distanceX) * self.speedup;;
-        }
-        var now = new Date;
-        var diff = (now - (hammer.lastDragTime || hammer.dragStart)) / 1000;
-        if (diff > 0.25)
-          diff = - diff + 0.25
-        if (diff > - 0.25)
-          hammer.speed = Math.max(0, hammer.speed + Math.abs(distance - (hammer.lastDragDistance || 0)) * 25 * diff)
-        else
-          hammer.speed = 0;
-        if (direction == 'right' || direction == 'left') {
-          var x = self.element.scrollLeft;
-          x += self.getViewportOffsetX(x);
-          self.select(x, true, null, null, 'dragend')
-        } else {
-          self.select(self.selected, true, true)
-        }
-      }
-    }
-    clearTimeout(self.swiped);
-    delete self.scrolled;
-    delete self.swiped;
-    delete self.swiping;
-    delete self.sliding;
-    delete self.scrollY;
-    delete hammer.offset;
-    delete hammer.lastDragDistance;
-    delete hammer.lastDragTime;
-    delete hammer.speed;
-    delete hammer.dragStart;
-    delete hammer.offsetHeight;
-    delete hammer.direction;
-    delete hammer.selected;
-    delete hammer.index;
-    delete hammer.meta;
-    delete hammer.up;
-    delete self.dragging;
+    var vX = event.velocityX, dX = event.deltaX;
+    var x = (self.scrollLeftStart - dX) + self.offsetWidth / 2  - 400 * (dX > 0 ? vX : - vX);
+    console.log(- dX - 400 * (dX > 0 ? vX : - vX))
+    var item = self.getItemByX(x);
+    var snap = self.getXByItem(item, dX < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
+    self.scrollTo(snap - (self.offsetWidth - item.offsetWidth) / 2, null, 800)
+    delete self.scrollLeftStart;
   }
 }
 Slideshow.prototype.detach = function() {
   if (this.hammer)
-    this.hammer.disable()
+    this.hammer.enable(false)
 }
 Slideshow.prototype.previous = function() {
   this.select('previous');
@@ -562,7 +410,7 @@ Slideshow.prototype.setOffset = function(element, value, property) {
   return true;
 }
 Slideshow.prototype.setVisibility = function() {
-  var scrollLeft = this.element.scrollLeft - this.placeholding;
+  var scrollLeft = this.wrapper.scrollLeft - this.placeholding;
   var screenWidth = window.innerWidth;
   var left = 0;
   var result = [];
@@ -626,10 +474,34 @@ Slideshow.prototype.setVisibility = function() {
     } 
   }
 }
-Slideshow.prototype.getXByItem = function(item) {
+Slideshow.prototype.getXByItem = function(item, condition) {
   var x = 0;
   for (var i = 0, other; (other = this.items[i]) != item; i++)
     x += this.offsetWidths[i] + this.gap;
+  if(condition && this.endless) {
+    var current = this.getXByItem(this.selected)
+    var offsetWidth = item.offsetWidth;
+    var scroll = this.scrollWidth;
+    if (condition == 'previous') {
+      if (x > current)
+        x -= scroll;
+    }
+    if (condition == 'next') {
+      if (x < current)
+        x += scroll;
+    }
+    if (condition == 'nearest') {
+      // if it's faster to go back through the beginning than go forward
+      if (x - current > current + scroll - x) {
+        x -= scroll;
+      // if it's faster to go over the limits than rewind back
+      } else if (current - x >= scroll - current + offsetWidth + x) {
+        x += scroll;
+      } else if (this.placeholding && current > x) {
+        x -= scroll;
+      }
+    }
+  }
   return x;
 }
 Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) {
@@ -637,22 +509,10 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
   var scroll = this.scrollWidth;
   var max = scroll - this.offsetWidth //- win /2 //+ this.offsetWidths[this.offsetWidths.length - 1];
   if (x && x.nodeType) {
-    var offset = this.getXByItem(x);
-    var current = this.getXByItem(this.selected)
-    var offsetWidth = x.offsetWidth;
-    if (this.endless) {
-      // if it's faster to go back through the beginning than go forward
-      if (offset - current > current + scroll - offset) {
-        offset -= scroll;
-      // if it's faster to go over the limits than rewind back
-      } else if (current - offset >= scroll - current + offsetWidth + offset) {
-        offset += scroll;
-      } else if (this.placeholding && current > offset) {
-        offset -= scroll;
-      }
-    }
-    var left = offset - Math.round((this.offsetWidth - offsetWidth) / 2);
-    x = this.endless ? left : Math.round(Math.min(max, Math.max(left, 0)))
+    var left = this.getXByItem(x, 'nearest');
+    x = left - Math.round((this.offsetWidth - x.offsetWidth) / 2);
+    if (!this.endless)
+      x = Math.round(Math.min(max, Math.max(x, 0)))
   }
   if (!smooth && this.endless) {
     if (x > max) {
@@ -669,11 +529,11 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
   cancelAnimationFrame(this.scrolling);
   delete this.scrolling
   delete this.busy;
-  if (!element) element = this.element;
+  if (!element) element = this.wrapper;
   if (smooth) {
     var duration = typeof smooth == 'number' ? smooth : this.duration;
     var fromX = this.scrollLeft;
-    if (this.placeholding && offset)
+    if (this.placeholding)
       fromX = - this.placeholding + fromX;
     if (x < - this.scrollWidth) {
       x += this.scrollWidth;
@@ -714,12 +574,12 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
   } else {
     if (x != null) {
       element.scrollLeft = x;
-      if (element == this.element) 
+      if (element == this.wrapper) 
         this.scrollLeft = x;
     }
     if (y != null) {
       element.scrollTop = y;
-      if (element == this.element) 
+      if (element == this.wrapper) 
         this.scrollTop = y;
     }
     this.setVisibility();
@@ -763,7 +623,7 @@ Slideshow.prototype.onResize = function(image) {
   if (innerWidth == this.width && innerHeight == this.height && resizing)
     return;
   if (!this.inline && resizing) {
-    this.element.style.height = innerHeight + 'px';
+    this.wrapper.style.height = innerHeight + 'px';
   }
   this.width = innerWidth;
   this.height = innerHeight;
@@ -773,23 +633,23 @@ Slideshow.prototype.onResize = function(image) {
     delete self.resized;
   }, 350)
   var mobile = innerWidth <= this.boundary// || window.innerHeight <= 512;
-  this.element.scrollTop = 0;
+  this.wrapper.scrollTop = 0;
   var minimized = innerWidth <= this.boundary;
-  var maxWidth = this.element.offsetWidth// - (mobile ? 0 : this.gap * 2) /*- this.scrollBarWidth*/
+  var maxWidth = this.wrapper.offsetWidth// - (mobile ? 0 : this.gap * 2) /*- this.scrollBarWidth*/
   var total = 0;
-  var maxHeight = this.inline ? Math.min(this.element.offsetHeight, innerHeight) : innerHeight - (mobile ? 0 : this.gap * 2) - this.scrollBarWidth;
+  var maxHeight = this.inline ? Math.min(this.wrapper.offsetHeight, innerHeight) : innerHeight - (mobile ? 0 : this.gap * 2) - this.scrollBarWidth;
   if (this.className.indexOf(' mobile') > -1) {
-    if (!mobile) this.element.className = this.className = this.className.replace(' mobile', '')
+    if (!mobile) this.wrapper.className = this.className = this.className.replace(' mobile', '')
   } else {
-    if (mobile) this.element.className = this.className += ' mobile';
+    if (mobile) this.wrapper.className = this.className += ' mobile';
   }
   var landscape = innerWidth > innerHeight;
   if (this.className.indexOf(' landscape') > -1) {
-    if (!landscape) this.element.className = this.className = this.className.replace(' landscape', '')
+    if (!landscape) this.wrapper.className = this.className = this.className.replace(' landscape', '')
   } else {
-    if (landscape) this.element.className = this.className += ' landscape';
+    if (landscape) this.wrapper.className = this.className += ' landscape';
   }
-  var fontSize = parseInt(this.getComputedStyle(this.element, 'fontSize', 'font-size')) || 16;
+  var fontSize = parseInt(this.getComputedStyle(this.wrapper, 'fontSize', 'font-size')) || 16;
   //if (this.element.className.indexOf('resizing') == -1)
   //  this.element.className += ' resizing';
   var items = resizing ? this.items.filter(function(item) {
@@ -865,8 +725,8 @@ Slideshow.prototype.onResize = function(image) {
     this.offsetWidths[index] = offsetWidth;
     this.offsetHeights[index] = item.offsetHeight;
     total += offsetWidth + (item.className.indexOf('final') > -1 ? 0 : this.gap);
-    this.scrollLeft = this.element.scrollLeft;
-    this.scrollTop = this.element.scrollTop;
+    this.scrollLeft = this.wrapper.scrollLeft;
+    this.scrollTop = this.wrapper.scrollTop;
   }
   
   if (resizing) return this.select(selected, true, false);
@@ -879,16 +739,13 @@ Slideshow.prototype.onResize = function(image) {
   
   //if (this.selected && (!image || !image.nodeType || image == this.selected)) this.crop(this.selected)
   this.list.style.width = (total - this.placeholding) + 'px' // / 16 + 'em';
-  this.offsetWidth = this.element.offsetWidth //innerWidth;
-  this.scrollWidth = this.element.scrollWidth;
+  this.offsetWidth = this.wrapper.offsetWidth //innerWidth;
+  this.scrollWidth = this.wrapper.scrollWidth;
   this.setVisibility();
 };
 
 Slideshow.prototype.getItemByX = function(x) {
   var rest = x;
-  if (this.placeholding) {
-    rest -= this.placeholding;
-  }
   if (rest < 0) {
     rest += this.scrollWidth;
   }
@@ -907,7 +764,7 @@ Slideshow.prototype.getItemByX = function(x) {
 
 Slideshow.prototype.onScroll = function(e) {
   var self = this;
-  var left = this.element.scrollLeft;
+  var left = this.wrapper.scrollLeft;
   var width = window.innerWidth;
   var max = this.maxWidth || this.scrollWidth - this.offsetWidth;
   if (left < 0) left += max;
@@ -916,7 +773,7 @@ Slideshow.prototype.onScroll = function(e) {
     return delete this.blocking;
   left += this.getViewportOffsetX(left)
   if (this.clicked) return;
-  this.select(left, false);
+  this.select(left - this.placeholding, false);
   this.setVisibility();
 };
 
@@ -938,7 +795,7 @@ Slideshow.prototype.onClick = function(e, gesture) {
   for (var el = e.target; el && el.nodeType != 9; el = el.parentNode) {
     if (el.nodeType != 1) continue;
     var rel = el.getAttribute('rel');
-    if (el.tagName == 'A' && (!rel || !this[rel]))g
+    if (el.tagName == 'A' && (!rel || !this[rel]))
       var link = el;
     if (el.className.indexOf('picture') > -1)
       var picture = el;
@@ -1011,7 +868,7 @@ Slideshow.prototype.onMouseWheel = function(e) {
   }
   e.preventDefault();
   if (delta) {
-    var x = Math.max(0, this.element.scrollLeft - delta * 30);  
+    var x = Math.max(0, this.wrapper.scrollLeft - delta * 30);  
     if (x != this.scrollLeft)
       this.scrollTo(x)
   }
@@ -1094,3 +951,14 @@ Slideshow.prototype.easings = {
 Slideshow.prototype.timings = {};
 Slideshow.prototype.duration = 400;
 Slideshow.prototype.easing = 'ease-out';
+
+Hammer.Instance.prototype.trigger = function(gesture, eventData) {
+  // trigger DOM event
+  var event = document.createEvent('Event');
+  event.initEvent(gesture, true, true);
+  event.gesture = eventData;
+  if (this['on' + gesture])
+    this['on' + gesture](eventData);
+  this.element.dispatchEvent(event);
+  return this;
+}
