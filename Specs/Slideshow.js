@@ -12,8 +12,8 @@ var build = function(images, gap, limit, vertical) {
   for (var i = 0; i < (limit || 3); i++) {
     var item = document.createElement('li');
     item.style.background = {0: 'orange', 1: 'blue', 2: 'red'}[i % 3];
-    if (gap)
-      item.style.marginRight = gap + 'px'
+    if (gap && i != (limit || 3) - 1)
+      item.style[vertical ? 'marginBottom' : 'marginRight'] = gap + 'px'
     if (images) {
       var picture = document.createElement('div');
       picture.className = 'picture';
