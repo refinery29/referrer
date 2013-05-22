@@ -17,7 +17,10 @@ Slideshow = function(element, options) {
   this.scrollBarWidth = element.offsetHeight - element.clientHeight;
   if (options)
     for (var option in options)
-      this[option] = options[option];
+      if (option == 'orientation')
+        this.setOrientation(options[option])
+      else
+        this[option] = options[option];
   // prevent scrolling underneath slideshow
   if (this.element && !this.inline) 
     this.element.addEventListener('touchmove', function(e) {
@@ -102,7 +105,6 @@ Slideshow.prototype.attach = function() {
   hammer.ondrag = function(event) {
     if (self.onDrag) self.onDrag(event);
     event.preventDefault()
-    console.log(event, event.velocity)
     if (event.deltaX) {
       self.scrollTo(self.scrollLeftStart - event.deltaX)
     }
@@ -113,10 +115,9 @@ Slideshow.prototype.attach = function() {
       self.onDragEnd(event);
     var vX = event.velocityX, dX = event.deltaX;
     var x = (self.scrollLeftStart - dX) + self.offsetWidth / 2  - 400 * (dX > 0 ? vX : - vX);
-    console.log(- dX - 400 * (dX > 0 ? vX : - vX))
     var item = self.getItemByPosition(x);
     var snap = self.getItemPosition(item, dX < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
-    self.scrollTo(snap - (self.offsetWidth - item.offsetWidth) / 2, null, 800)
+    self.scrollTo(snap - (self.offsetWidth - item.offsetWidth) / 2, 800)
     delete self.scrollLeftStart;
   }
 }
@@ -207,67 +208,51 @@ Slideshow.prototype.interact = function() {
   }, 350)
 }
 Slideshow.prototype.placehold = function(x) {
-  var width = 0;
+  var value = 0;
   var placeheld = (this.placeheld || (this.placeheld = []));
-  for (var i = this.items.length; i-- && (width < x);) {
+  for (var i = this.items.length; i-- && (value < x);) {
     var child = this.items[i];
     if (placeheld.indexOf(child) == -1) {
       placeheld.push(child)
       child.style.position = 'absolute';
       child.classList.add('placeheld');
     }
-    width += this.offsetWidths[i] + this.gap;
+    value += this[this.offsets][i] + this.gap;
   }
-  if (this.placeholding != width) {
-    this.list.style.paddingLeft = width + 'px';
-    this.list.style.width = (this.scrollWidth - width) + 'px'
-    var left = 0;
-    var difference = this.placeholding - width;
+  if (this.placeholding != value) {
+    this.list.style[this.padding] = value + 'px';
+    this.list.style[this.dimension] = (this[this.scroll] - value) + 'px'
+    var position = 0;
+    var difference = this.placeholding - value;
     for (var i = placeheld.length, child; child = placeheld[--i];) {
-      var offsetWidth = this.offsetWidths[this.items.indexOf(child)];
-      if (difference >= offsetWidth) {
-        difference -= offsetWidth + this.gap;
+      var offset = this[this.offsets][this.items.indexOf(child)];
+      if (difference >= offset) {
+        difference -= offset + this.gap;
         placeheld.pop();
         child.classList.remove('placeheld'); 
         child.style.position = '';
-        child.style.left = 'auto';
+        child.style[this.property] = 'auto';
       } else {
-        child.style.left = left + 'px';
-        left += this.gap;
-        left += offsetWidth;
+        child.style[this.property] = position + 'px';
+        position += this.gap;
+        position += offset;
       }
     }
-    this.placeholding = width;
+    this.placeholding = value;
   }
-  return width;
+  return value;
 };
-Slideshow.prototype.setOffset = function(element, value, property) {
-  var property = this.property;
-  if (property == null)
-    property = this.property = // element.style.transform !== undefined 
-                               //   ? 'transform' :
-                               // element.style.webkitTransform !== undefined 
-                               //   ? 'webkitTransform' :
-                               'marginTop';
-  var value = property == 'marginTop'
-    ? value + 'px'
-    : 'translateY(' + value + 'px)';
-  if (element.style[property] === value)
-    return false;
-  element.style[property] = value;
-  return true;
-}
 Slideshow.prototype.setVisibility = function() {
-  var scrollLeft = this.wrapper.scrollLeft - this.placeholding;
-  var screenWidth = window.innerWidth;
+  var scrollLeft = this.wrapper[this.scroll] - this.placeholding;
+  var screenWidth = window[this.inner];
   var left = 0;
   var result = [];
   for (var i = 0, item, items = this.items; 
       item = items[i] || (this.endless && items[i - items.length]);
       i++) {
     if (item != this.items[i])
-      left -= this.scrollWidth;
-    var offsetWidth = this.offsetWidths[i]
+      left -= this[this.scroll];
+    var offsetWidth = this[this.offsets][i]
     if ((scrollLeft > offsetWidth + left) || (scrollLeft + screenWidth < left)) {
       if (result.indexOf(item) > -1)
         result.splice(result.indexOf(item), 1);
@@ -323,34 +308,34 @@ Slideshow.prototype.setVisibility = function() {
   }
 }
 Slideshow.prototype.getItemPosition = function(item, condition) {
-  var x = 0;
+  var position = 0;
   for (var i = 0, other; (other = this.items[i]) != item; i++)
-    x += this.offsetWidths[i] + this.gap;
+    position += this[this.offsets][i] + this.gap;
   if(condition && this.endless) {
     var current = this.getItemPosition(this.selected)
-    var offsetWidth = item.offsetWidth;
-    var scroll = this.scrollWidth;
+    var offset = item[this.offset];
+    var scroll = this[this.scroll];
     if (condition == 'previous') {
-      if (x > current)
-        x -= scroll;
+      if (position > current)
+        position -= scroll;
     }
     if (condition == 'next') {
-      if (x < current)
-        x += scroll;
+      if (position < current)
+        position += scroll;
     }
     if (condition == 'nearest') {
       // if it's faster to go back through the beginning than go forward
-      if (x - current > current + scroll - x) {
-        x -= scroll;
+      if (position - current > current + scroll - position) {
+        position -= scroll;
       // if it's faster to go over the limits than rewind back
-      } else if (current - x >= scroll - current + offsetWidth + x) {
-        x += scroll;
-      } else if (this.placeholding && current > x) {
-        x -= scroll;
+      } else if (current - position >= scroll - current + offset + position) {
+        position += scroll;
+      } else if (this.placeholding && current > position) {
+        position -= scroll;
       }
     }
   }
-  return x;
+  return position;
 }
 Slideshow.prototype.scrollTo = function(position, smooth, manual, element, reverse) {
   var max = this[this.scroll] - this[this.offset]
@@ -466,26 +451,17 @@ Slideshow.prototype.onResize = function(image) {
   this.resized = setTimeout(function() {
     delete self.resized;
   }, 350)
-  var mobile = innerWidth <= this.boundary// || window.innerHeight <= 512;
   this.wrapper.scrollTop = 0;
   var minimized = innerWidth <= this.boundary;
-  var maxWidth = this.wrapper.offsetWidth// - (mobile ? 0 : this.gap * 2) /*- this.scrollBarWidth*/
+  var maxWidth = this.wrapper.offsetWidth
   var total = 0;
-  var maxHeight = this.inline ? Math.min(this.wrapper.offsetHeight, innerHeight) : innerHeight - (mobile ? 0 : this.gap * 2) - this.scrollBarWidth;
-  if (this.className.indexOf(' mobile') > -1) {
-    if (!mobile) this.wrapper.className = this.className = this.className.replace(' mobile', '')
-  } else {
-    if (mobile) this.wrapper.className = this.className += ' mobile';
-  }
+  var maxHeight = this.inline ? Math.min(this.wrapper.offsetHeight, innerHeight) : innerHeight - this.gap * 2 - this.scrollBarWidth;
   var landscape = innerWidth > innerHeight;
   if (this.className.indexOf(' landscape') > -1) {
     if (!landscape) this.wrapper.className = this.className = this.className.replace(' landscape', '')
   } else {
     if (landscape) this.wrapper.className = this.className += ' landscape';
   }
-  var fontSize = parseInt(this.getComputedStyle(this.wrapper, 'fontSize', 'font-size')) || 16;
-  //if (this.element.className.indexOf('resizing') == -1)
-  //  this.element.className += ' resizing';
   var items = resizing ? this.items.filter(function(item) {
     return item.className.indexOf('visible') > -1
   }) : this.items;
@@ -516,39 +492,31 @@ Slideshow.prototype.onResize = function(image) {
       maxItemHeight = maxThisHeight;
     if (picture) {
       var scaledWidth = Math.floor(Math.min(maxWidth, width, width / height * maxItemHeight))
-      var scaledHeight = Math.ceil(scaledWidth / (width / height));
+      var scaledHeight = this.round(scaledWidth / (width / height));
       img.style.height = scaledHeight + 'px';
     } else {
       var scaledWidth =  Math.min(maxWidth/* - this.gap * 2*/, width);
       var scaledHeight = maxThisHeight//Math.min(height, maxItemHeight, maxHeight);
       //if (!this.endless)
-        item.style.height = scaledHeight + (mobile ? 0 : this.gap) + 'px';
+        item.style.height = scaledHeight + this.gap + 'px';
     }
     var offsetWidth = Math.max(minimized && !this.inline ? this.width : 0, scaledWidth);
     if (!image || !image.nodeType || image == img) {
       var whitespace = Math.max(maxThisHeight - scaledHeight, 0);
-      var actualWidth = offsetWidth//scaledWidth + (mobile ? 0 : this.gap * 2);
+      var actualWidth = offsetWidth//scaledWidth
       item.style.width = actualWidth + 'px'
     }
     this.offsetWidths[index] = offsetWidth;
     this.offsetHeights[index] = item.offsetHeight;
-    total += offsetWidth + (item.className.indexOf('final') > -1 ? 0 : this.gap);
+    total += this[this.offsets][index] + (item.className.indexOf('final') > -1 ? 0 : this.gap);
     this.scrollLeft = this.wrapper.scrollLeft;
     this.scrollTop = this.wrapper.scrollTop;
   }
   
   if (resizing) return this.select(selected, true, false);
-  //this.element.className = this.element.className.replace(' resizing', '');
-  if (this.lastWrapper && (!image || !image.nodeType))
-    this.lastWrapper.style.height = innerHeight - 36 + 'px';
-
-
-    
-  
-  //if (this.selected && (!image || !image.nodeType || image == this.selected)) this.crop(this.selected)
-  this.list.style.width = (total - this.placeholding) + 'px' // / 16 + 'em';
-  this.offsetWidth = this.wrapper.offsetWidth //innerWidth;
-  this.scrollWidth = this.wrapper.scrollWidth;
+  this.list.style[this.dimension] = (total - this.placeholding) + 'px'
+  this[this.offset] = this.wrapper[this.offset];
+  this[this.scroll] = this.wrapper[this.scroll];
   this.setVisibility();
 };
 
@@ -652,11 +620,15 @@ Slideshow.prototype.getComputedStyle = function(el, camelCase, hyphenated) {
 
 Slideshow.prototype.setOrientation = function(orientation) {
   this.orientation = orientation;
-  this.scroll      = orientation == 'landscape' ? 'scrollWidth'  : 'scrollHeight';
-  this.offset      = orientation == 'landscape' ? 'offsetWidth'  : 'offsetHeight';
-  this.inner       = orientation == 'landscape' ? 'innerWidth'   : 'innerHeight';
-  this.scrollNow   = orientation == 'landscape' ? 'scrollLeft'   : 'scrollTop';
   this.offsets     = orientation == 'landscape' ? 'offsetWidths' : 'offsetHeights';
+  this.offset      = orientation == 'landscape' ? 'offsetWidth'  : 'offsetHeight';
+  this.scroll      = orientation == 'landscape' ? 'scrollWidth'  : 'scrollHeight';
+  this.inner       = orientation == 'landscape' ? 'innerWidth'   : 'innerHeight';
+  this.dimension   = orientation == 'landscape' ? 'width'        : 'height';
+  this.padding     = orientation == 'landscape' ? 'paddingLeft'  : 'paddingTop';
+  this.scrollNow   = orientation == 'landscape' ? 'scrollLeft'   : 'scrollTop';
+  this.property    = orientation == 'landscape' ? 'left'         : 'top';
+  this.round       = orientation == 'landscape' ? Math.ceil      : Math.floor
 }
 Slideshow.prototype.setOrientation('landscape');
 

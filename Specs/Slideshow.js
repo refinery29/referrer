@@ -1,12 +1,14 @@
-var build = function(images, gap, limit) {
+var build = function(images, gap, limit, vertical) {
   var element = document.createElement('div');
   var list = document.createElement('ul');
   element.style.overflow = 'hidden';
   element.style.width = '200px'
   element.style.position = 'relative';
   list.style.overflow = 'hidden'
-  list.style.width = '2000px'
+  list.style[vertical ? 'height' : 'width'] = '2000px'
   list.style.padding = list.style.margin = 0;
+  if (vertical)
+    element.style.height = '200px'
   for (var i = 0; i < (limit || 3); i++) {
     var item = document.createElement('li');
     item.style.background = {0: 'orange', 1: 'blue', 2: 'red'}[i % 3];
@@ -59,6 +61,32 @@ describe('Sideshow', function() {
         slideshow.select('previous', true, false);
         expect(element.scrollLeft).toBe(0)
         document.body.removeChild(element);
+      })
+      describe('and slideshow is vertical', function() {
+        it ('should initialize slides and scroll wrapper', function() {
+          var element = build(null, null, null, true);
+          document.body.appendChild(element)
+          var slideshow = new Slideshow(element, {
+            orientation: 'portrait'
+          });
+          expect(slideshow.list.style.height).toBe('600px')
+          expect(slideshow.list.offsetHeight).toBe(600);
+          expect(slideshow.list.offsetWidth).toBe(200);
+          expect(element.scrollTop).toBe(0);
+          slideshow.select('next', true, false);
+          expect(element.scrollTop).toBe(200);
+          slideshow.select('next', true, false);
+          expect(element.scrollTop).toBe(400)
+          slideshow.select('next', true, false);
+          expect(element.scrollTop).toBe(400)
+          slideshow.select('previous', true, false);
+          expect(element.scrollTop).toBe(200)
+          slideshow.select('previous', true, false);
+          expect(element.scrollTop).toBe(0)
+          slideshow.select('previous', true, false);
+          expect(element.scrollTop).toBe(0)
+          document.body.removeChild(element);
+        })
       })
     })
     describe('and gap is set', function() {
@@ -465,6 +493,102 @@ describe('Carousel', function() {
           expect(slideshow.element.scrollLeft).toBe(167 * 6 + 8 * 7 - 200)
           document.body.removeChild(element);
         })
+
+        describe('and carousel is vertical', function() {
+
+          it ('should downscale pictures and have an off-screen gap', function() {
+            var element = build({
+              src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+              width: 335,
+              height: 280
+            }, 8, 7, true)
+            document.body.appendChild(element)
+            slideshow = new Carousel(element, {
+              gap: 8,
+              orientation: 'portrait'
+            });
+            expect(slideshow.images[0].getAttribute('height')).toBe('280');
+            expect(slideshow.images[0].offsetHeight).toBe(167);
+            expect(slideshow.images[0].getAttribute('width')).toBe('335');
+            expect(slideshow.images[0].offsetWidth).toBe(200);
+            expect(slideshow.scrollHeight).toBe((167 + 8) * 7)
+            expect(slideshow.element.scrollTop).toBe(0)
+            expect(slideshow.placeholding).toBe(0);
+            slideshow.select('previous', true, false)
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false)
+            expect(slideshow.placeholding).toBe(0);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('previous', true, false)
+            expect(slideshow.element.scrollTop).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('previous', true, false)
+            expect(slideshow.element.scrollTop).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('previous', true, false)
+            expect(slideshow.element.scrollTop).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('previous', true, false)
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, false)
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false)
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false)
+            expect(slideshow.placeholding).toBe(0);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('next', true, false)
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, false)
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('next', true, false);
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, false);
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, false);
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false);
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('previous', true, false);
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, false);
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false)
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, false);
+            expect(slideshow.placeholding).toBe(0);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            //document.body.removeChild(element);
+          })
+        })
       })
       describe('and transition is animated', function() {
         it ('should animate to the same values as if there were no transition', function() {
@@ -735,6 +859,279 @@ describe('Carousel', function() {
             //document.body.removeChild(element);
           })
         })
+
+        describe('and slideshow is vertical', function() {
+          
+          it ('should animate to the same values as if there were no transition', function() {
+
+            var element = build({
+              src: 'http://static2.refinery29.com/bin/entry/7bf/280x335/1015527/bingedrinking-opener.jpg',
+              width: 335,
+              height: 280
+            }, 8, 7, true)
+            element.style.width = '200px'
+            element.style.height = '200px'
+            document.body.appendChild(element)
+            slideshow = new Carousel(element, {
+              gap: 8,
+              orientation: 'portrait'
+            });
+            expect(slideshow.images[0].getAttribute('height')).toBe('280');
+            expect(slideshow.images[0].offsetHeight).toBe(167);
+            expect(slideshow.images[0].getAttribute('width')).toBe('335');
+            expect(slideshow.images[0].offsetWidth).toBe(200);
+            expect(slideshow.scrollHeight).toBe((167 + 8) * 7)
+            expect(slideshow.element.scrollTop).toBe(0)
+            expect(slideshow.placeholding).toBe(0);
+            slideshow.select('previous', true, 100)
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe(0);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe(0);
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('next', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 5 + 8 * 6 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 4 + 8 * 5 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 3 + 8 * 4 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.element.scrollTop).toBe(167 * 2 + 8 * 3 - 200)
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8));
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+            expect(slideshow.placeholding).toBe((167 + 8) * 2);
+            expect(slideshow.element.scrollTop).toBe(Math.floor((167 + 8) - (200 - 167) / 2))
+            slideshow.select('previous', true, 100)
+            })
+            waitsFor(function() {
+              return !slideshow.scrolling
+            });
+            runs(function() {
+             
+              expect(slideshow.placeholding).toBe(0);
+              expect(slideshow.element.scrollTop).toBe(167 * 6 + 8 * 7 - 200)
+              //document.body.removeChild(element);
+            })
+          })  
+        })
       })
     })
     describe('horizontally', function() {
@@ -795,51 +1192,51 @@ describe('Carousel', function() {
       expect(slideshow.images[0].getAttribute('height')).toBe('335');
       expect(slideshow.images[0].offsetHeight).toBe(335);
       expect(slideshow.scrollLeft).toBe(0)
-      //slideshow.scrollTo(-100)
-      //expect(slideshow.scrollLeft).toBe(280 - 100)
-      //expect(slideshow.placeholding).toBe(280)
-      //expect(slideshow.items[6].style.left).toBe('0px');
-      //slideshow.scrollTo(-280)
-      //expect(slideshow.scrollLeft).toBe(280 - 280)
-      //expect(slideshow.placeholding).toBe(280)
-      //expect(slideshow.items[6].style.left).toBe('0px');
-      //slideshow.scrollTo(-280 - 100)
-      //expect(slideshow.scrollLeft).toBe(280 - 100)
-      //expect(slideshow.placeholding).toBe(280 * 2)
-      //expect(slideshow.items[6].style.left).toBe('280px');
-      //expect(slideshow.items[5].style.left).toBe('0px');
-      //slideshow.scrollTo(-280)
-      //expect(slideshow.scrollLeft).toBe(280 - 280)
-      //expect(slideshow.placeholding).toBe(280)
-      //expect(slideshow.items[6].style.left).toBe('0px');
-      //expect(slideshow.items[5].style.left).toBe('auto');
-      //slideshow.scrollTo(0)
-      //expect(slideshow.scrollLeft).toBe(0)
-      //expect(slideshow.placeholding).toBe(0)
-      //expect(slideshow.items[6].style.left).toBe('auto');
-      //expect(slideshow.items[5].style.left).toBe('auto');
-      //slideshow.scrollTo(560);
-      //expect(slideshow.scrollLeft).toBe(560)
-      //expect(slideshow.placeholding).toBe(0)
-      //expect(slideshow.items[6].style.left).toBe('auto');
-      //expect(slideshow.items[5].style.left).toBe('auto');
-      //slideshow.scrollTo(660);
-      //expect(slideshow.scrollLeft).toBe(100)
-      //expect(slideshow.placeholding).toBe(1400)
-      //expect(slideshow.items[6].style.left).toBe(280 * 4 + 'px');
-      //expect(slideshow.items[5].style.left).toBe(280 * 3 + 'px');
-      //expect(slideshow.items[4].style.left).toBe(280 * 2 + 'px');
-      //expect(slideshow.items[3].style.left).toBe(280 * 1 + 'px');
-      //expect(slideshow.items[2].style.left).toBe(280 * 0 + 'px');
-      //expect(slideshow.items[1].style.left).toBe('');
-      //slideshow.scrollTo(860);
-      //expect(slideshow.items[6].style.left).toBe(280 * 3 + 'px');
-      //expect(slideshow.items[5].style.left).toBe(280 * 2 + 'px');
-      //expect(slideshow.items[4].style.left).toBe(280 * 1 + 'px');
-      //expect(slideshow.items[3].style.left).toBe(280 * 0 + 'px');
-      //expect(slideshow.items[2].style.left).toBe('auto');
-      //expect(slideshow.scrollLeft).toBe(20)
-      //expect(slideshow.placeholding).toBe(1120)
+      slideshow.scrollTo(-100)
+      expect(slideshow.scrollLeft).toBe(280 - 100)
+      expect(slideshow.placeholding).toBe(280)
+      expect(slideshow.items[6].style.left).toBe('0px');
+      slideshow.scrollTo(-280)
+      expect(slideshow.scrollLeft).toBe(280 - 280)
+      expect(slideshow.placeholding).toBe(280)
+      expect(slideshow.items[6].style.left).toBe('0px');
+      slideshow.scrollTo(-280 - 100)
+      expect(slideshow.scrollLeft).toBe(280 - 100)
+      expect(slideshow.placeholding).toBe(280 * 2)
+      expect(slideshow.items[6].style.left).toBe('280px');
+      expect(slideshow.items[5].style.left).toBe('0px');
+      slideshow.scrollTo(-280)
+      expect(slideshow.scrollLeft).toBe(280 - 280)
+      expect(slideshow.placeholding).toBe(280)
+      expect(slideshow.items[6].style.left).toBe('0px');
+      expect(slideshow.items[5].style.left).toBe('auto');
+      slideshow.scrollTo(0)
+      expect(slideshow.scrollLeft).toBe(0)
+      expect(slideshow.placeholding).toBe(0)
+      expect(slideshow.items[6].style.left).toBe('auto');
+      expect(slideshow.items[5].style.left).toBe('auto');
+      slideshow.scrollTo(560);
+      expect(slideshow.scrollLeft).toBe(560)
+      expect(slideshow.placeholding).toBe(0)
+      expect(slideshow.items[6].style.left).toBe('auto');
+      expect(slideshow.items[5].style.left).toBe('auto');
+      slideshow.scrollTo(660);
+      expect(slideshow.scrollLeft).toBe(100)
+      expect(slideshow.placeholding).toBe(1400)
+      expect(slideshow.items[6].style.left).toBe(280 * 4 + 'px');
+      expect(slideshow.items[5].style.left).toBe(280 * 3 + 'px');
+      expect(slideshow.items[4].style.left).toBe(280 * 2 + 'px');
+      expect(slideshow.items[3].style.left).toBe(280 * 1 + 'px');
+      expect(slideshow.items[2].style.left).toBe(280 * 0 + 'px');
+      expect(slideshow.items[1].style.left).toBe('');
+      slideshow.scrollTo(860);
+      expect(slideshow.items[6].style.left).toBe(280 * 3 + 'px');
+      expect(slideshow.items[5].style.left).toBe(280 * 2 + 'px');
+      expect(slideshow.items[4].style.left).toBe(280 * 1 + 'px');
+      expect(slideshow.items[3].style.left).toBe(280 * 0 + 'px');
+      expect(slideshow.items[2].style.left).toBe('auto');
+      expect(slideshow.scrollLeft).toBe(20)
+      expect(slideshow.placeholding).toBe(1120)
       expect(1).toBe(2)
     })
   })
