@@ -1237,7 +1237,6 @@ describe('Carousel', function() {
       expect(slideshow.items[2].style.left).toBe('auto');
       expect(slideshow.scrollLeft).toBe(20)
       expect(slideshow.placeholding).toBe(1120)
-      expect(1).toBe(2)
     })
   })
 })
