@@ -302,8 +302,8 @@ describe('Carousel', function() {
         expect(element.scrollLeft).toBe(0)
         expect(slideshow.placeholding).toBe(0);
         slideshow.select('previous', true, false);
-        expect(slideshow.placeholding).toBe(208);
-        expect(element.scrollLeft).toBe(0)
+        expect(slideshow.placeholding).toBe(0);
+        expect(element.scrollLeft).toBe(416)
         slideshow.select('previous', true, false);
         expect(element.scrollLeft).toBe(200 + 8)
         slideshow.select('previous', true, false);
