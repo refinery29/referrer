@@ -15,10 +15,6 @@ Slideshow = function(element, options) {
   this.offsetHeights = [];
   this.choices = R29.getElementsByClassName(element, 'choices')[0];
   this.scrollBarWidth = element.offsetHeight - element.clientHeight;
-  this.menu = element.getElementsByTagName('menu')[0];
-  this.last = R29.getElementsByClassName(element, 'final')[0];
-  if (this.last)
-    this.lastWrapper = R29.getElementsByClassName(this.last, 'wrapper')[0]
   if (options)
     for (var option in options)
       this[option] = options[option];
@@ -27,21 +23,15 @@ Slideshow = function(element, options) {
     this.element.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, false);
-  if (this.menu) this.menu.style.marginBottom = this.scrollBarWidth + 'px'
   if (this.className)
     this.className = this.wrapper.className = this.wrapper.className + ' ' + this.className
   else
     this.className = el.wrapperement.className;
-  if (this.choices) this.choice = R29.getElementsByClassName(this.choices, 'selected')[0];
   for (var children = this.list.childNodes, i = 0, child; child = children[i++];) {
     if (child.tagName != 'LI') continue;
-    var picture = R29.getElementsByClassName(child, 'picture')[0];
-    var meta = R29.getElementsByClassName(child, 'meta')[0];
-    this.metas.push(meta);
-    var description = R29.getElementsByClassName(child, 'description')[0];
-    this.descriptions.push(description)
-    var image = picture && picture.getElementsByTagName('img')[0];
     this.items.push(child);
+    var picture = R29.getElementsByClassName(child, 'picture')[0];
+    var image = picture && picture.getElementsByTagName('img')[0];
     this.pictures.push(picture);
     var index = this.images.push(image) - 1;
     if (image) {
@@ -56,13 +46,11 @@ Slideshow = function(element, options) {
   this.items[0].className += ' first';
   this.items[this.items.length - 1].className += ' last';
   this.selected = this.items[0];
-  //this.select(this.items[0]);
   this.onResize()
   this.scrollTo(this.focusing ? this.selected : 0)
   this.attach();
 };
 Slideshow.prototype.attach = function() {
-
   var self = this;
   var element = this.wrapper;
   this.hammer = hammer = new Hammer(this.inline ? element : document.body, {
@@ -105,17 +93,6 @@ Slideshow.prototype.attach = function() {
     if (self.onDragStart) self.onDragStart(event);
     self.scrollLeftStart = self.scrollLeft - self.placeholding;
   }
-  hammer.onhold = function(event) {
-    self.onTouch(event);      
-    for (var target = event.target; target; target = target.parentNode) {
-      if (target.className && target.className.indexOf('meta') > -1) {
-        self.less(self.selected, 'hold')
-        return;
-        break;
-      }
-    }
-    return self.onClick(event, 'hold')
-  }
 
   hammer.ontap = function(event) {
     self.onTouch(event);
@@ -137,8 +114,8 @@ Slideshow.prototype.attach = function() {
     var vX = event.velocityX, dX = event.deltaX;
     var x = (self.scrollLeftStart - dX) + self.offsetWidth / 2  - 400 * (dX > 0 ? vX : - vX);
     console.log(- dX - 400 * (dX > 0 ? vX : - vX))
-    var item = self.getItemByX(x);
-    var snap = self.getXByItem(item, dX < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
+    var item = self.getItemByPosition(x);
+    var snap = self.getItemPosition(item, dX < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
     self.scrollTo(snap - (self.offsetWidth - item.offsetWidth) / 2, null, 800)
     delete self.scrollLeftStart;
   }
@@ -153,12 +130,9 @@ Slideshow.prototype.previous = function() {
 Slideshow.prototype.next = function() {
   this.select('next');
 }
-Slideshow.prototype.close = function(e, gesture) {
+Slideshow.prototype.close = function(e) {
   e.preventDefault()
   e.stopPropagation()
-  if (this.expanded) 
-    return this.less(this.expanded, null, gesture);
-  this.fireEvent('close', gesture || e);
   //this.select(this.selected);
 }
 Slideshow.prototype.repeat = function() {
@@ -186,7 +160,7 @@ Slideshow.prototype.select = function(element, scroll, animate, gesture) {
     default:
       if (!element) return;
       if (typeof element == 'number') {
-        element = this.getItemByX(element);
+        element = this.getItemByPosition(element);
       }
   }
   if (scroll !== false) {
@@ -197,10 +171,8 @@ Slideshow.prototype.select = function(element, scroll, animate, gesture) {
       delete self.clicking;
       delete self.clicked;
     }, 400)
-    this.scrollTo(element, 0, animate == null ? true : animate);
+    this.scrollTo(element, animate == null ? true : animate);
   }
-  if (!gesture && this.selected != element && !scroll && this.openDate)
-    gesture = this.items.indexOf(element) < this.selectedIndex ? 'scrollright' : 'scrollleft'
   if (this.selected != element) { 
     if (this.selected) 
       this.selected.classList.remove('selected');
@@ -222,24 +194,8 @@ Slideshow.prototype.select = function(element, scroll, animate, gesture) {
       (this.previousItem = prev).classList.add('past');
     if (next && this.nextItem != next) 
       (this.nextItem = next).classList.add('future');
-    if (this.expanded && this.expanded != this.selected) {
-      this.less(this.expanded);
-      if (this.keep) this.more(this.selected);
-    }
   }
 };
-Slideshow.prototype.crop = function(element) {
-  var max = window.innerHeight - 48;
-  var height = element.offsetHeight - this.gap;
-  var prev = this.items[this.items.indexOf(element) - 1];
-  var next = this.items[this.items.indexOf(element) + 1];
-  for (var i = 0, item; item = this.items[i++];)
-    if (item != element)
-      item.style.height = Math.max(max, height) / 16 + 'em';
-  for (var i = 0, item; item = this.extras[i++];)
-    if (item != element)
-      item.style.height = Math.max(max, height) / 16 + 'em';
-}
 Slideshow.prototype.interact = function() {
   if (document.body.className.indexOf('interacting') == -1)
     document.body.className += ' interacting';
@@ -250,114 +206,6 @@ Slideshow.prototype.interact = function() {
     delete self.interaction;
   }, 350)
 }
-Slideshow.prototype.toggle = function(event) {
-  if (this.expanded == this.selected)
-    this.less(this.expanded, null, event);
-  else
-    this.more(this.selected, null, event);
-}
-Slideshow.prototype.more = function(element, sizing, gesture) {
-  if (this.collapsing == element || element.className.indexOf('empty') > -1) return;
-  if (!sizing) this.interact();
-  var index = this.items.indexOf(element);
-  var picture = this.pictures[index];
-  var meta = this.metas[index];
-  var mobile = this.className.indexOf('mobile') > -1// || window.innerHeight <= 512;
-  if (meta && element.className.indexOf('minimal') == -1) {
-    if (element.className.indexOf('expanded') == -1)
-      element.className += ' expanded';
-    var wrapper = meta.parentNode;
-    var mask = R29.getElementsByClassName(meta, 'mask')[0];
-    var computed = this.getComputedStyle(meta, 'minHeight', 'min-height');
-    var offset = this.scrollBarWidth;
-    var innerHeight = window.innerHeight
-    wrapper.style.maxHeight = innerHeight - offset + 'px'
-    mask.style.maxHeight = innerHeight - offset - 5 - (mobile ? -this.gap : this.gap)  + 'px';
-    var offsetHeight = mask.offsetHeight;
-    var larger = (offsetHeight < mask.scrollHeight);
-    if (mask.className.indexOf('scrollable') == -1) {
-      if (larger) mask.className += ' scrollable';
-    } else {
-      if (!larger) mask.className = mask.className.replace(' scrollable', '');
-    }
-    if (computed && computed.indexOf('%') > -1) {
-      var height = (parseFloat(computed) / 100 * innerHeight);
-      mask.style.height = (height - 29) + 'px';
-    } else {  
-      mask.style.height = 'auto';
-      var height = Math.min(innerHeight - this.scrollBarWidth, mask.offsetHeight)
-      if (element.className.indexOf('minimal') > -1)
-        height -= 4
-      computed = null;
-    }
-    this.paddingTop = parseInt(picture.style.paddingTop);
-    if (!sizing && this.shifting && (!mobile || this.className.indexOf('fullscreen') == -1) && height > this.paddingTop) {
-      var top = height - this.paddingTop + 16;
-      picture.style.paddingTop = Math.max(0, this.paddingTop - top) + 'px'
-      picture.style.paddingBottom = this.paddingTop * 2 - Math.max(0, this.paddingTop - top) + 'px'
-    }
-    if (sizing) return;
-    this.expanding = element;
-    if (this.collapsing == element) {
-      clearTimeout(this.collapsingTimeout);
-      delete this.collapsing
-    }
-    this.expanded = element;
-    var self = this;
-    clearTimeout(this.expandingTimeout);
-    this.expandingTimeout = setTimeout(function() {
-      delete self.expanding;
-      delete self.expandingTimeout;
-    }, 250)
-    if (sizing !== 'fast')
-      this.setOffset(wrapper, - height + (mobile ? 0 : this.gap));
-    mask.scrollTop = 0;
-  }
-  if (gesture)
-    this.fireEvent('more', gesture);
-  //this.scrollTo(element, element.offsetHeight - window.innerHeight + 16, true);
-}
-Slideshow.prototype.less = function(element, sizing, gesture) {
-  if (this.expanding == element)
-    return false;
-  if (sizing !== false)
-    this.interact();
-  var index = this.items.indexOf(element);
-  var picture = this.pictures[index];
-  var meta = this.metas[index];
-  if (meta) {
-    var mobile = this.className.indexOf('mobile') > -1;
-    var wrapper = meta.parentNode;
-    var mask = R29.getElementsByClassName(meta, 'mask')[0];
-    if (mask.className.indexOf('scrollable') > -1)
-      mask.className = mask.className.replace(' scrollable', '');
-    if (mask.scrollTop)
-      mask.scrollTop = 0;
-    if (this.shifting && !sizing) 
-      picture.style.paddingTop = picture.style.paddingBottom = this.paddingTop + 'px'
-    if (this.expanded == element)
-      delete this.expanded;
-    this.collapsing = element;
-    var self = this;
-    if (sizing !== false)
-      this.collapsingTimeout = setTimeout(function() {
-        if (self.collapsing == element)
-          delete self.collapsing;
-        if (element.className.indexOf(' expanded') > -1)
-          element.className = element.className.replace(' expanded', '');        
-      }, 200);
-    var innerHeight = window.innerHeight
-    var gutter = mobile ? 0 : this.gap;
-    var height = Math.min(innerHeight - this.scrollBarWidth, mask.offsetHeight) - gutter / 2
-    var offset = element.className.indexOf('minimal') > -1 ?  - height  + 4: - this.offset - 1;
-    this.setOffset(wrapper, offset + gutter)
-    if (gesture)
-      this.fireEvent('less', gesture);
-  }
-}
-Slideshow.prototype.fireEvent = function(event, action, label, data) {
-
-};
 Slideshow.prototype.placehold = function(x) {
   var width = 0;
   var placeheld = (this.placeheld || (this.placeheld = []));
@@ -474,12 +322,12 @@ Slideshow.prototype.setVisibility = function() {
     } 
   }
 }
-Slideshow.prototype.getXByItem = function(item, condition) {
+Slideshow.prototype.getItemPosition = function(item, condition) {
   var x = 0;
   for (var i = 0, other; (other = this.items[i]) != item; i++)
     x += this.offsetWidths[i] + this.gap;
   if(condition && this.endless) {
-    var current = this.getXByItem(this.selected)
+    var current = this.getItemPosition(this.selected)
     var offsetWidth = item.offsetWidth;
     var scroll = this.scrollWidth;
     if (condition == 'previous') {
@@ -504,26 +352,24 @@ Slideshow.prototype.getXByItem = function(item, condition) {
   }
   return x;
 }
-Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) {
-  var win = Math.min(window.innerWidth, this.offsetWidth);
-  var scroll = this.scrollWidth;
-  var max = scroll - this.offsetWidth //- win /2 //+ this.offsetWidths[this.offsetWidths.length - 1];
-  if (x && x.nodeType) {
-    var left = this.getXByItem(x, 'nearest');
-    x = left - Math.round((this.offsetWidth - x.offsetWidth) / 2);
+Slideshow.prototype.scrollTo = function(position, smooth, manual, element, reverse) {
+  var max = this[this.scroll] - this[this.offset]
+  if (position.nodeType) {
+    var pos = this.getItemPosition(position, 'nearest');
+    position = pos - Math.round((this[this.offset] - position[this.offset]) / 2);
     if (!this.endless)
-      x = Math.round(Math.min(max, Math.max(x, 0)))
+      position = Math.round(Math.min(max, Math.max(position, 0)))
   }
   if (!smooth && this.endless) {
-    if (x > max) {
-      var rewind = this.offsetWidth - (x - max);
+    if (position > max) {
+      var rewind = this[this.offset] - (position - max);
       this.placehold(rewind);
-      x = this.placeholding - rewind// (x - max)
-    } else if (x < - this.offsetWidth) {
+      position = this.placeholding - rewind;
+    } else if (position < - this[this.offset]) {
       this.placehold(0);
-      x = this.scrollWidth + x;
+      position = this[this.scroll] + position;
     } else {
-      x += this.placehold(Math.max(0, - x));
+      position += this.placehold(Math.max(0, - position));
     }
   }
   cancelAnimationFrame(this.scrolling);
@@ -532,15 +378,14 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
   if (!element) element = this.wrapper;
   if (smooth) {
     var duration = typeof smooth == 'number' ? smooth : this.duration;
-    var fromX = this.scrollLeft;
+    var from = this[this.scrollNow];
     if (this.placeholding)
-      fromX = - this.placeholding + fromX;
-    if (x < - this.scrollWidth) {
-      x += this.scrollWidth;
-    } else if (fromX < 0 && x > this.scrollWidth - this.offsetWidth) {
-      x -= this.scrollWidth;
+      from = - this.placeholding + from;
+    if (position < - this[this.scroll]) {
+      position += this[this.scroll];
+    } else if (from < 0 && position > this[this.scroll] - this[this.offset]) {
+      position -= this[this.scroll];
     }
-    var fromY = element.scrollTop;
     var start = (new Date).getTime();
     var self = this;
     var fn = function(){
@@ -554,8 +399,7 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
                = self.bezier.apply(self, self.easings[easing])))
       }
       self.scrollTo(
-        x == null ? x : Math.round(fromX + (x - fromX) * easing(progress, duration)),
-        y == null ? y : Math.round(fromY + (y - fromY) * easing(progress, duration)),
+        Math.round(from + (position - from) * easing(progress, duration)),
         null,
         manual,
         element,
@@ -569,19 +413,11 @@ Slideshow.prototype.scrollTo = function(x, y, smooth, manual, element, reverse) 
       }
     };
     self.scrolling = requestAnimationFrame(fn);
-    if (x != null)
-      self.busy = true;
+    self.busy = true;
   } else {
-    if (x != null) {
-      element.scrollLeft = x;
-      if (element == this.wrapper) 
-        this.scrollLeft = x;
-    }
-    if (y != null) {
-      element.scrollTop = y;
-      if (element == this.wrapper) 
-        this.scrollTop = y;
-    }
+    element[this.scrollNow] = position;
+    if (element == this.wrapper) 
+      this[this.scrollNow] = position;
     this.setVisibility();
   }
 }
@@ -599,9 +435,7 @@ Slideshow.prototype.scrollBarWidth = 16/*(function(wrapper) {
   document.body.removeChild(wrapper)
   return width;
 })(document.createElement('div'));*/
-Slideshow.prototype.boundary = parseFloat((location.search.match(/boundary=([\d.]+)/i) || [0,641])[1])
 Slideshow.prototype.speedup = parseFloat((location.search.match(/speedup=([\d.]+)/i) || [0,1])[1]);
-Slideshow.prototype.offset = parseFloat((location.search.match(/offset=([\d.]+)/i) || [0,0])[1]);
 Slideshow.prototype.snap = parseFloat((location.search.match(/snap=([\d.]+)/i) || [0,20])[1]);
 Slideshow.prototype.gap = parseFloat((location.search.match(/gap=([\d.]+)/i) || [0,0])[1]);
 Slideshow.prototype.shifting = (location.search.match(/shifting=([^&]+)/i) || [0,0])[1] != '0';
@@ -662,7 +496,6 @@ Slideshow.prototype.onResize = function(image) {
     this.redrawing = setTimeout(function() {
       self.onResize();
       self.select(selected, true, false);
-      //self[self.expanded == selected ? 'more' : 'less'](selected, false);
       selected.style.overflow = 'hidden';
       setTimeout(function() {
         selected.style.overflow = 'visible'
@@ -679,8 +512,6 @@ Slideshow.prototype.onResize = function(image) {
     var description = this.descriptions[index];
     var maxItemHeight = parseInt(this.getComputedStyle(item, 'maxHeight', 'max-height'));
     var maxThisHeight = maxHeight;
-    if (this.excluding && this.offset && picture && item.className.indexOf('empty') == -1)
-      maxThisHeight -= this.offset;
     if (!maxItemHeight || maxItemHeight > maxThisHeight) 
       maxItemHeight = maxThisHeight;
     if (picture) {
@@ -697,30 +528,7 @@ Slideshow.prototype.onResize = function(image) {
     if (!image || !image.nodeType || image == img) {
       var whitespace = Math.max(maxThisHeight - scaledHeight, 0);
       var actualWidth = offsetWidth//scaledWidth + (mobile ? 0 : this.gap * 2);
-      item.style.width = actualWidth + 'px' // fontSize + 'em';
-      if (picture) {
-        picture.style.maxWidth = scaledWidth + 'px'
-        picture.style.paddingTop = Math.floor(whitespace / 2) + 'px';
-        picture.style.paddingBottom = (this.excluding && this.offset || 0) + Math.ceil(whitespace / 2) + 'px';
-      }
-      if (picture) picture.style.minHeight = maxThisHeight - whitespace + 'px';
-      var currentHeight = 22;
-      var minimal = item.className.indexOf('minimal') > -1;
-      if (description) {
-        item.className += ' minimal'
-        if (description.scrollHeight - currentHeight < 30) {
-          if (!minimal) 
-            item.className += ' minimal'
-        } else {
-          item.className = item.className.replace(' minimal', '');
-          if (minimal) 
-            item.className = item.className.replace(' minimal', '');
-        }
-        if (this.expanded == item) 
-          this.more(item, false)
-        else
-          this.less(item, false);
-      }
+      item.style.width = actualWidth + 'px'
     }
     this.offsetWidths[index] = offsetWidth;
     this.offsetHeights[index] = item.offsetHeight;
@@ -744,51 +552,46 @@ Slideshow.prototype.onResize = function(image) {
   this.setVisibility();
 };
 
-Slideshow.prototype.getItemByX = function(x) {
-  var rest = x;
-  if (rest < 0) {
-    rest += this.scrollWidth;
-  }
+Slideshow.prototype.getItemByPosition = function(position) {
+  if (position < 0)
+    position += this[this.scroll];
   for (var item, i = 0, items = this.items; 
        item = items[i] || (this.endless && items[i - items.length]);
        i++) {
     var el = item;
-    var width = this.offsetWidths[i] ||  (this.endless && this.offsetWidths[i - items.length]);
-    if (rest < width)
+    var offsets = this[this.offsets];
+    var width = offsets[i] ||  (this.endless && offsets[i - items.length]);
+    if (position < width)
       break;
     else 
-      rest -= (width + this.gap);
+      position -= (width + this.gap);
   }
   return el;
 }
 
 Slideshow.prototype.onScroll = function(e) {
-  var self = this;
-  var left = this.wrapper.scrollLeft;
-  var width = window.innerWidth;
-  var max = this.maxWidth || this.scrollWidth - this.offsetWidth;
-  if (left < 0) left += max;
   if (this.resized  || this.clicked) return;
   if (this.blocking)
     return delete this.blocking;
-  left += this.getViewportOffsetX(left)
+  var position = this.wrapper[this.scrollNow];
+  position += this.getViewportOffset(position)
   if (this.clicked) return;
-  this.select(left - this.placeholding, false);
+  this.select(position - this.placeholding, false);
   this.setVisibility();
 };
 
-Slideshow.prototype.getViewportOffsetX = function(x) {
-  var scroll = this.scrollWidth;
-  var offsetWidth = this.offsetWidth;
-  var total = scroll - offsetWidth;
+Slideshow.prototype.getViewportOffset = function(position) {
+  var scroll = this[this.scroll];
+  var offset = this[this.offset];
+  var total = scroll - offset;
   if (this.endless)
-    return offsetWidth / 2;
-  if (x < offsetWidth / 4) 
-    return x + 3
-  else if (total - x < offsetWidth / 3) {
-    return offsetWidth * 0.8 - (total - x)
+    return offset / 2;
+  if (position < offset / 4) 
+    return position
+  else if (total - position < offset / 3) {
+    return offset * 0.8 - (total - position)
   } else
-    return offsetWidth / 2
+    return offset / 2
 }
 
 Slideshow.prototype.onClick = function(e, gesture) {
@@ -809,7 +612,6 @@ Slideshow.prototype.onClick = function(e, gesture) {
       if (el.className.indexOf('last') > -1 || this.endless)
         if (el !== this.selected) {
           e.preventDefault();
-          e.stopPropagation();
           var self = this;
           this.clickBlocked = true;
           this.select(el, true);
@@ -819,22 +621,6 @@ Slideshow.prototype.onClick = function(e, gesture) {
           }, 500)
         }
       var li = el;
-      if (!link && this.items.indexOf(el) > -1) {
-        if (this.expanded == el) {
-          if (this.clicking)
-            this.less(el, undefined, gesture);
-        } else { 
-          if (this.selected == el) {
-            if (this.clicking)
-              this.more(el, undefined, gesture)
-          } else {
-            this.select(el, true, null, gesture);
-            var selected = el;
-          }
-        }
-        if (!this.clicking)
-          this.fireEvent('tap', target || el);
-      }   
       if (!picture && !link && !selected && !img && !panel) {
         var x = e.pageX || e.clientX;
         var width = window.innerWidth;
@@ -856,23 +642,6 @@ Slideshow.prototype.onTouch = function(e) {
   if (!target && !window.scrollY)
     window.scrollTo(0, 250)
 }
-Slideshow.prototype.onMouseWheel = function(e) {
-  return;
-  var delta = 0;
-  if (!event) event = window.event;
-  if (event.wheelDelta) {
-    delta = event.wheelDelta/120; 
-    if (window.opera) delta = -delta;
-  } else if (event.detail) {
-    delta = -event.detail/3;
-  }
-  e.preventDefault();
-  if (delta) {
-    var x = Math.max(0, this.wrapper.scrollLeft - delta * 30);  
-    if (x != this.scrollLeft)
-      this.scrollTo(x)
-  }
-}
 
 Slideshow.prototype.getComputedStyle = function(el, camelCase, hyphenated) {
   if (el.currentStyle) return el.currentStyle[camelCase];
@@ -880,6 +649,16 @@ Slideshow.prototype.getComputedStyle = function(el, camelCase, hyphenated) {
     computed = defaultView ? defaultView.getComputedStyle(el, null) : null;
   return (computed) ? computed.getPropertyValue(hyphenated) : null;
 };
+
+Slideshow.prototype.setOrientation = function(orientation) {
+  this.orientation = orientation;
+  this.scroll      = orientation == 'landscape' ? 'scrollWidth'  : 'scrollHeight';
+  this.offset      = orientation == 'landscape' ? 'offsetWidth'  : 'offsetHeight';
+  this.inner       = orientation == 'landscape' ? 'innerWidth'   : 'innerHeight';
+  this.scrollNow   = orientation == 'landscape' ? 'scrollLeft'   : 'scrollTop';
+  this.offsets     = orientation == 'landscape' ? 'offsetWidths' : 'offsetHeights';
+}
+Slideshow.prototype.setOrientation('landscape');
 
 Carousel = function() {
   Slideshow.apply(this, arguments);
