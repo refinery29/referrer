@@ -94,7 +94,7 @@ Slideshow.prototype.attach = function() {
       if (el == element) break;
     if (!el) return;
     if (self.onDragStart) self.onDragStart(event);
-    self.scrollLeftStart = self.scrollLeft - self.placeholding;
+    self.scrollStart = self[self.scrollNow] - self.placeholding;
   }
 
   hammer.ontap = function(event) {
@@ -105,20 +105,22 @@ Slideshow.prototype.attach = function() {
   hammer.ondrag = function(event) {
     if (self.onDrag) self.onDrag(event);
     event.preventDefault()
-    if (event.deltaX) {
-      self.scrollTo(self.scrollLeftStart - event.deltaX)
+    var delta    = self.orientation == 'landscape' ? event.deltaX : event.deltaY;
+    if (delta) {
+      self.scrollTo(self.scrollStart - delta)
     }
   }
   
   hammer.ondragend = function(event) {
     if (self.onDragEnd)
       self.onDragEnd(event);
-    var vX = event.velocityX, dX = event.deltaX;
-    var x = (self.scrollLeftStart - dX) + self.offsetWidth / 2  - 400 * (dX > 0 ? vX : - vX);
+    var velocity = self.orientation == 'landscape' ? event.velocityX : event.velocityY;
+    var delta    = self.orientation == 'landscape' ? event.deltaX : event.deltaY;
+    var x = (self.scrollStart - delta) + self.offsetWidth / 2  - 400 * (delta > 0 ? velocity : - velocity);
     var item = self.getItemByPosition(x);
-    var snap = self.getItemPosition(item, dX < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
-    self.scrollTo(snap - (self.offsetWidth - item.offsetWidth) / 2, 800)
-    delete self.scrollLeftStart;
+    var snap = self.getItemPosition(item, delta < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
+    self.scrollTo(snap - (self[self.offset] - item[self.offset]) / 2, 800)
+    delete self.scrollStart;
   }
 }
 Slideshow.prototype.detach = function() {
