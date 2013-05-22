@@ -116,7 +116,7 @@ Slideshow.prototype.attach = function() {
       self.onDragEnd(event);
     var velocity = self.orientation == 'landscape' ? event.velocityX : event.velocityY;
     var delta    = self.orientation == 'landscape' ? event.deltaX : event.deltaY;
-    var x = (self.scrollStart - delta) + self.offsetWidth / 2  - 400 * (delta > 0 ? velocity : - velocity);
+    var x = (self.scrollStart - delta) + self[self.offset] / 2  - 400 * (delta > 0 ? velocity : - velocity);
     var item = self.getItemByPosition(x);
     var snap = self.getItemPosition(item, delta < 0 ? 'next' : 'previous');//   + self.offsetWidth / 2;
     self.scrollTo(snap - (self[self.offset] - item[self.offset]) / 2, 800)
