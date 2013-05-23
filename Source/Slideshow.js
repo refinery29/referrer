@@ -49,6 +49,7 @@ Slideshow = function(element, options) {
   this.items[0].className += ' first';
   this.items[this.items.length - 1].className += ' last';
   this.selected = this.items[0];
+  this.selected.className += ' selected';
   this.onResize()
   this.scrollTo(this.focusing ? this.selected : 0)
   this.attach();
@@ -425,10 +426,6 @@ Slideshow.prototype.scrollBarWidth = 16/*(function(wrapper) {
 Slideshow.prototype.speedup = parseFloat((location.search.match(/speedup=([\d.]+)/i) || [0,1])[1]);
 Slideshow.prototype.snap = parseFloat((location.search.match(/snap=([\d.]+)/i) || [0,20])[1]);
 Slideshow.prototype.gap = parseFloat((location.search.match(/gap=([\d.]+)/i) || [0,0])[1]);
-Slideshow.prototype.shifting = (location.search.match(/shifting=([^&]+)/i) || [0,0])[1] != '0';
-Slideshow.prototype.clicking = (location.search.match(/clicking=([^&]+)/i) || [0,'false'])[1] != 'false';
-Slideshow.prototype.centering = (location.search.match(/centering=([^&]+)/i) || [0,false])[1] != 'false';
-Slideshow.prototype.excluding = (location.search.match(/excluding=([^&]+)/i) || [0,true])[1] != 'false';
 Slideshow.prototype.placeholding = 0;
 Slideshow.prototype.inline = true;
 Slideshow.prototype.className = 
@@ -474,10 +471,6 @@ Slideshow.prototype.onResize = function(image) {
     this.redrawing = setTimeout(function() {
       self.onResize();
       self.select(selected, true, false);
-      selected.style.overflow = 'hidden';
-      setTimeout(function() {
-        selected.style.overflow = 'visible'
-      }, 10)
     }, 30);
   }
   for (var i = 0, item; item = items[i]; i++) {
@@ -498,9 +491,9 @@ Slideshow.prototype.onResize = function(image) {
       img.style.height = scaledHeight + 'px';
     } else {
       var scaledWidth =  Math.min(maxWidth/* - this.gap * 2*/, width);
-      var scaledHeight = maxThisHeight//Math.min(height, maxItemHeight, maxHeight);
+      var scaledHeight = Math.min(height, maxItemHeight, maxHeight);
       //if (!this.endless)
-        item.style.height = scaledHeight + this.gap + 'px';
+        item.style.height = scaledHeight + 'px';
     }
     var offsetWidth = Math.max(minimized && !this.inline ? this.width : 0, scaledWidth);
     if (!image || !image.nodeType || image == img) {

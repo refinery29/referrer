@@ -96,7 +96,7 @@ describe('Sideshow', function() {
         var slideshow = new Slideshow(element, {gap: 8});
         expect(slideshow.list.style.width).toBe('624px')
         expect(slideshow.list.offsetWidth).toBe(600 + 8 * 3);
-        expect(slideshow.list.offsetHeight).toBe(208);
+        expect(slideshow.list.offsetHeight).toBe(200);
         expect(element.scrollLeft).toBe(0);
         slideshow.select('next', true, false);
         expect(element.scrollLeft).toBe(200 + 8);
@@ -288,7 +288,7 @@ describe('Carousel', function() {
         var slideshow = new Carousel(element, {gap: 8});
         expect(slideshow.list.style.width).toBe('624px')
         expect(slideshow.list.offsetWidth).toBe(208 * 3);
-        expect(slideshow.list.offsetHeight).toBe(208);
+        expect(slideshow.list.offsetHeight).toBe(200);
         expect(element.scrollLeft).toBe(0);
         slideshow.select('next', true, false);
         expect(element.scrollLeft).toBe(200 + 8);
