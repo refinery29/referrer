@@ -23,6 +23,16 @@ R29.Script.prototype.isLoaded = function(src) {
   return this.loaded == src;
 };
 
+R29.Script.prototype.isLoading = function(src) {
+  if (this.global) {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0, script; script = scripts[i++];)
+      if (script.src.indexOf(src) > -1)
+        return script;
+  }
+  return this.loading == src;
+}
+
 R29.Script.prototype.include = function(src, callback) {
   var script = document.createElement('script');
   script.type= 'text/javascript';
@@ -48,10 +58,30 @@ R29.Script.prototype.load = function(src, onComplete, onStart) {
     }
     return;
   }
-  if (!src || (this.script && this.script == src)) return;
+  var loading = this.isLoading(src);
+  if (loading) {
+    if (!this.loading) {
+      if (onStart)
+        onStart.call(this);
+      this.loading = src;
+      if (loading.nodeType) {
+        this.script = loading;
+        var thus = this;
+        loading.addEventListener('load', function(event) {
+          thus.onFinish(event, queue, onComplete, loading);
+        })
+      } else if (this.isLoaded != LSD.Script.prototype.isLoaded) {
+        // poll periodically?
+      }
+    }
+    return;
+  }
+  if (!src || this.loading == src) return;
   var thus = this;
   var group = this.group;
+  this.loading = src;
   var script = this.include(src, function(event) {
+    delete thus.loading
     thus.onFinish(event, queue, onComplete, script)
   })
   if (!this.script) this.script = script;

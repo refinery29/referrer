@@ -12,7 +12,7 @@ R29.Beacon.prototype.eager = false;
 
 R29.Beacon.initialize = function(options) {
   if (!this.queueing)
-    this.queueing = window.addEventListener('load', R29.Beacon.onPageLoad)
+    this.queueing = window.addEventListener('load', R29.Beacon.onPageLoad) || true;
   for (var name in options)
     if (!this[name])
       this.prototype[name] = options[name];
