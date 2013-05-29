@@ -29,7 +29,11 @@ R29.Video = function(id, element) {
   }
 };
 R29.Video.onLoad = function(id) {
-  this.instances[id].onLoad(id)
+  var isntance = R29.Video.prototype.instances[id];
+  if (instance) 
+    instance.onLoad(id)
+  else
+    new R29.Video(id);
 }
 R29.Video.prototype = new R29.Script;
 R29.Video.prototype.instances = {};
