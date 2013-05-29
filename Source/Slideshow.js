@@ -383,8 +383,15 @@ Slideshow.prototype.scrollTo = function(position, smooth, manual, element, rever
       if (reverse) progress = 1 - progress;
       var easing = self.easing;
       if (typeof easing == 'string') {
-        easing = (self.timings[easing] || (self.timings[easing] 
-               = self.bezier.apply(self, self.easings[easing])))
+        var timing = self.timings[easing];
+        if (!timing) {
+          var def = self.easings[easing];
+          if (!def) def = easing.split(/\s*,\s*/).map(function(bit) {
+            return parseFloat(bit)
+          });
+          self.timings[easing] = timing = self.bezier.apply(self, def)
+        }
+        easing = timing;
       }
       self.scrollTo(
         Math.round(from + (position - from) * easing(progress, duration)),
