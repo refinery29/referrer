@@ -91,9 +91,9 @@ R29.Video.prototype.onReady = function() {
 R29.Video.prototype.onLoad = function(id) {
   var experience = this.experience = brightcove.instances[id];
   this.player = this.experience.getModule("videoPlayer");
-  this.addEventListener('mediaPlay', this.onStart);
-  this.addEventListener('mediaProgress', this.onProgress);
-  this.addEventListener('mediaStop', this.onStop);
+  this.player.addEventListener('mediaPlay', this.onStart);
+  this.player.addEventListener('mediaProgress', this.onProgress);
+  this.player.addEventListener('mediaStop', this.onStop);
 
 
   // initialize skip-ad stuff
