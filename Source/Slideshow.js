@@ -488,7 +488,7 @@ Slideshow.prototype.onResize = function(image) {
     var height = (img && parseInt(img.getAttribute('height'))) || item.offsetHeight;
     var meta = this.metas[index];
     var description = this.descriptions[index];
-    var maxItemHeight = parseInt(this.getComputedStyle(item, 'maxHeight', 'max-height'));
+    var maxItemHeight = parseInt(R29.getComputedStyle(item, 'maxHeight', 'max-height'));
     var maxThisHeight = maxHeight;
     if (!maxItemHeight || maxItemHeight > maxThisHeight) 
       maxItemHeight = maxThisHeight;
@@ -612,13 +612,6 @@ Slideshow.prototype.onTouch = function(e) {
   if (!target && !window.scrollY)
     window.scrollTo(0, 250)
 }
-
-Slideshow.prototype.getComputedStyle = function(el, camelCase, hyphenated) {
-  if (el.currentStyle) return el.currentStyle[camelCase];
-  var defaultView = document.defaultView,
-    computed = defaultView ? defaultView.getComputedStyle(el, null) : null;
-  return (computed) ? computed.getPropertyValue(hyphenated) : null;
-};
 
 Slideshow.prototype.setOrientation = function(orientation) {
   this.orientation = orientation;

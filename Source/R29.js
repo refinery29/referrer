@@ -14,6 +14,13 @@ R29.getElementsByClassName = function(element, name) {
   return result;
 };
 
+R29.getComputedStyle = function(el, camelCase, hyphenated) {
+  if (el.currentStyle) return el.currentStyle[camelCase];
+  var defaultView = document.defaultView,
+    computed = defaultView ? defaultView.getComputedStyle(el, null) : null;
+  return (computed) ? computed.getPropertyValue(hyphenated) : null;
+};
+
 // Copyright 2009-2012 by contributors, MIT License
 // vim: ts=4 sts=4 sw=4 expandtab
 
