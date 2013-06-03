@@ -4,6 +4,8 @@ R29.ellipsis = function(container, limit, pixels, label) {
     text = container.textContent;
     container.setAttribute('text-content', text);
   }
+
+  // calculate element dimensions
   var lineHeight = parseFloat(R29.getComputedStyle(container, 'lineHeight', 'line-height'));
   var paddingTop = parseFloat(R29.getComputedStyle(container, 'paddingTop', 'padding-top'));
   var paddingBottom = parseFloat(R29.getComputedStyle(container, 'paddingBottom', 'padding-bottom'));
@@ -15,17 +17,20 @@ R29.ellipsis = function(container, limit, pixels, label) {
     var lines = limit || parseInt(container.getAttribute('maxlines')) || 2;
     var height = lineHeight * lines;
   }
+  var width = container.offsetWidth - paddingLeft - paddingRight;
   var max = text.length;
   var now = 0;
   var state = true;
-  var baseline = R29.getRangeAt(container, 0).getBoundingClientRect()
   if (!label) label = '…';
   var self = R29.ellipsis;
+
+  // measure ellipsis element
   var more = R29.getElementsByClassName(container, 'ellipsis')[0];
   if (!more) {
     var stack = R29.ellipsis.stack[label];
     more = stack && stack.pop() || document.createElement('span');
     more.className = 'ellipsis';
+    more.style.whiteSpace = 'nowrap';
     more.innerHTML = label;
     more.style.position = 'absolute';
     container.appendChild(more);
@@ -34,25 +39,29 @@ R29.ellipsis = function(container, limit, pixels, label) {
     more.style.position = '';
   } else {
     var placeholder = more.offsetWidth;
-    if (more.parentNode)
-      more.parentNode.removeChild(more)
+    more.parentNode.removeChild(more)
   }
 
-  var width = container.offsetWidth - paddingLeft - paddingRight;
-  for (var range = max, n = 0; range >= 0.25;) {
-    range /= 2;
-    n += state ? range : - range;
+  // measure basline (first character)
+  var baseline = R29.getRangeAt(container, 0).getBoundingClientRect()
+
+  // find a spot for ellipsis
+  for (var delta = max, n = 0; delta >= 0.25;) {
+    delta /= 2;
+    n += state ? delta : - delta;
     var now = Math.round(n);
-    var r = R29.getRangeAt(container, now);
-    var rectangle = r.getBoundingClientRect(); 
+    var range = R29.getRangeAt(container, now, range);
+    var rectangle = range.getBoundingClientRect(); 
     var diff = rectangle.top - baseline.top;
     state = diff < height
     if ((height - diff) <= lineHeight && (rectangle.right - baseline.left) > width - placeholder) {
       state = false;
-      if (range < 2)
-        range = 2
+      if (delta < 2)
+        delta = 2
     }
   }
+
+  // move cursor to omit unfinished words and punctuation
   var offset = 0;
   if (now != max) {
     for (var chr; chr = text.charAt(now - offset);) {
@@ -71,48 +80,46 @@ R29.ellipsis = function(container, limit, pixels, label) {
     }
     now -= offset;
   }
-  var range = R29.getRangeAt(container, now);
+
+  // put a cursor at the new spot
+  if (offset)
+    var range = R29.getRangeAt(container, now, range);
   var node = range.endContainer;
+
+  // if there's enough room, remove ellipsis
   if ((range.overflown && !range.overflown) || now == max) {
-    var removed = true;
-    if (more.parentNode) {
-      (self.stack[label] || (self.stack[label] = [])).push(more)
-      more.parentNode.removeChild(more);
+    (self.stack[label] || (self.stack[label] = [])).push(more)
+  // otherwise truncate text node, add ellipsis
+  } else {
+    var content = node.textContent;
+    if (range.endOffset != content.length || (range.overflow == offset && offset)) {
+      if (!node.replaced)
+        node.replaced = content;
+      node.textContent = content.substring(0, range.startOffset);
     }
-    //return;
-  }
-  for (var current = node, past = 0;;) {
-    if (current.nodeType == 3) {
-      if (current == node) {
-        var content = current.textContent;
-        if (range.endOffset != content.length || (range.overflow == offset && offset)) {
-          if (!current.replaced)
-            current.replaced = content;
-          current.textContent = content.substring(0, range.startOffset);
+    var next = node.nextSibling;
+    node.parentNode.insertBefore(more, next)
+    if (!next) next = more;
+    for (var up = next; up; up = up.parentNode) {
+      var right = next == up ? up : up.nextSibling
+      for (; right; right = right.nextSibling) {
+        switch (right.nodeType) {
+          case 1:
+            if (right != more)
+              right.style.display = 'none';
+            break;
+          case 3:
+            if (!right.replaced) right.replaced = right.textContent;
+            right.textContent = '';
         }
-        if (!removed)
-          node.parentNode.insertBefore(more, next)
       }
     }
-    var next = current.firstChild;
-    for (; !next && current != container; current = current.parentNode) {
-      next = current.nextSibling;
-      if (next == more)
-        next = next.nextSibling;
-    }
-    if (next) {
-      current = next;
-      continue;
-    }
-    break;
   }
+
 }
-R29.getRangeAt = function(element, position, real) {
+// walk elements to reach desired position (n-th character)
+R29.getRangeAt = function(element, position, dummy) {
   for (var current = element, past = 0;;) {
-    var ellipsis = current.className == 'ellipsis';
-    var next = ellipsis && current.nextSibling || current.firstChild;
-    if (ellipsis)
-      current.parentNode.removeChild(current)
     if (current.nodeType == 3) {
       if (overflown)
         break;
@@ -130,6 +137,10 @@ R29.getRangeAt = function(element, position, real) {
       } else {
         var overflown = current;
       }
+    } else if (current.nodeType == 1) { 
+      if (!overflown && current.style.display == 'none')
+        current.style.display = '';
+      var next = current.firstChild;
     }
     for (; !next; ) {
       next = current.nextSibling;
@@ -142,13 +153,15 @@ R29.getRangeAt = function(element, position, real) {
     }
     if (next) {
       current = next;
+      next = null;
       continue;
     }
     break;
   }
   if (!text)
     return;
-  var dummy = document.createRange();
+  // place dom range that can be measured
+  if (!dummy) dummy = document.createRange();
   var length = text.textContent.length;
   var last = Math.min(position - past, length - 1);
   dummy.overflown = overflown == current;

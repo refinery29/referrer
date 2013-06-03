@@ -154,7 +154,7 @@ it ('should crop block elements with padding and custom ellipsis', function() {
     R29.ellipsis(container, 3, null, '. <a href="#">Read it here plz</a>');
     getText(container, 'Maybe if I take all the Claritin at once, these exciting. Read it here plz')
     expect(container.offsetHeight).toBe(60 + 20);
-    R29.ellipsis(container, 4, null, '<a href="#">Read it here plz</a>');
+    R29.ellipsis(container, 4, null, '. <a href="#">Read it here plz</a>');
     getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies. Read it here plz')
     expect(container.offsetHeight).toBe(80 + 20);
     R29.ellipsis(container, 3, null, '. <a href="#">Read it here plz</a>');
@@ -166,12 +166,27 @@ it ('should crop block elements with padding and custom ellipsis', function() {
     R29.ellipsis(container, 1, null, '. <a href="#">Read it here plz</a>');
     getText(container, 'Maybe if I take all the. Read it here plz')
     expect(container.offsetHeight).toBe(20 + 20);
-    //R29.ellipsis(container, 5, null, '<a>Read it here plz</a>');
-    //getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes…')
-    //R29.ellipsis(container, 6, null, '<a>Read it here plz</a>');
-    //getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
-    //R29.ellipsis(container, 7, null, '<a>Read it here plz</a>');
-    //getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
+    R29.ellipsis(container, 5, null, '<a>Read it here plz</a>');
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good!. Read it here plz')
+    expect(container.offsetHeight).toBe(100 + 20);
+    R29.ellipsis(container, 6, null, '<a>Read it here plz</a>');
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
+    expect(container.offsetHeight).toBe(120 + 20);
+    R29.ellipsis(container, 7, null, '<a>Read it here plz</a>');
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
+    expect(container.offsetHeight).toBe(120 + 20);
+    R29.ellipsis(container, 1, null, '. <a href="#">Read it here plz</a>');
+    getText(container, 'Maybe if I take all the. Read it here plz')
+    expect(container.offsetHeight).toBe(20 + 20);
+    R29.ellipsis(container, 3, null, '. <a href="#">Read it here plz</a>');
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting. Read it here plz')
+    expect(container.offsetHeight).toBe(60 + 20);
+    R29.ellipsis(container, 6, null, '<a>Read it here plz</a>');
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
+    expect(container.offsetHeight).toBe(120 + 20);
+    R29.ellipsis(container, 2, null, '. <a href="#">Read it here plz</a>');
+    getText(container, 'Maybe if I take all the Claritin. Read it here plz')
+    expect(container.offsetHeight).toBe(40 + 20);
   })
 
 
