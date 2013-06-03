@@ -1,4 +1,4 @@
-R29.ellipsis = function(container, limit, pixels, label) {
+R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   var text = container.getAttribute('text-content');
   if (!text) {
     text = container.textContent;
@@ -28,19 +28,32 @@ R29.ellipsis = function(container, limit, pixels, label) {
   var more = R29.getElementsByClassName(container, 'ellipsis')[0];
   if (!more) {
     var stack = R29.ellipsis.stack[label];
-    more = stack && stack.pop() || document.createElement('span');
-    more.className = 'ellipsis';
-    more.style.whiteSpace = 'nowrap';
-    more.innerHTML = label;
-    more.style.position = 'absolute';
-    container.appendChild(more);
-    var placeholder = more.offsetWidth;
-    container.removeChild(more)
-    more.style.position = '';
-  } else {
-    var placeholder = more.offsetWidth;
-    more.parentNode.removeChild(more)
+    more = stack && stack.pop();
   }
+  if (!more) {
+    more = document.createElement('span');
+    more.innerHTML = label;
+  }
+  var wrap = R29.getElementsByClassName(more, 'wrap')[0];
+  if (!wrap) {
+    var white = document.createElement('span');;
+    white.className = 'whitespace';
+    white.appendChild(document.createTextNode(whitespace || ' '));
+    wrap = document.createElement('span');;
+    wrap.className = 'wrap';
+    wrap.style.whiteSpace = 'nowrap';
+    for (var child; child = more.firstChild;)
+      wrap.appendChild(child);
+    more.appendChild(white)
+    more.appendChild(wrap);
+  } else
+    var white = R29.getElementsByClassName(more, 'whitespace')[0];
+  more.className = 'ellipsis';
+  more.style.position = 'absolute';
+  container.appendChild(more);
+  var placeholder = wrap.offsetWidth;
+  container.removeChild(more)
+  more.style.position = '';
 
   // measure basline (first character)
   var baseline = R29.getRangeAt(container, 0).getBoundingClientRect()
