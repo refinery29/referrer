@@ -1,3 +1,13 @@
+R29.getLineHeight = function(element) {
+  var lineHeight = R29.getComputedStyle(element, 'lineHeight', 'line-height');
+  if (lineHeight == 'normal' || lineHeight.match(/^[\d.]+(em|%)$/)) {
+    var fontSize = parseFloat(R29.getComputedStyle(element, 'fontSize', 'font-size'));
+    return (parseFloat(lineHeight) || 1.5) * fontSize;
+  } else {
+    return parseFloat(lineHeight)
+  }
+}
+
 R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   var text = container.getAttribute('text-content');
   if (!text) {
@@ -6,13 +16,6 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   }
 
   // calculate element dimensions
-  var lineHeight = R29.getComputedStyle(container, 'lineHeight', 'line-height');
-  if (lineHeight == 'normal' || lineHeight.match(/^[\d.]+(em)$/)) {
-    var fontSize = parseFloat(R29.getComputedStyle(container, 'fontSize', 'font-size'));
-    lineHeight = (parseFloat(lineHeight) || 1.5) * fontSize;
-  } else {
-    lineHeight = parseFloat(lineHeight)
-  }
   var paddingTop = parseFloat(R29.getComputedStyle(container, 'paddingTop', 'padding-top'));
   var paddingBottom = parseFloat(R29.getComputedStyle(container, 'paddingBottom', 'padding-bottom'));
   var paddingLeft = parseFloat(R29.getComputedStyle(container, 'paddingLeft', 'padding-left'));
@@ -21,7 +24,7 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     var height = limit;
   } else {
     var lines = limit || parseInt(container.getAttribute('maxlines')) || 2;
-    var height = lineHeight * lines;
+    var height = R29.getLineHeight(container) * lines;
   }
   var width = container.offsetWidth - paddingLeft - paddingRight;
   var max = text.length;
@@ -40,6 +43,9 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   if (!more) {
     more = document.createElement('span');
     more.innerHTML = label;
+    more.className = 'ellipsis';
+  } else {
+    more.parentNode.removeChild(more);
   }
   var wrap = R29.getElementsByClassName(more, 'wrap')[0];
   if (!wrap) {
@@ -55,24 +61,17 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     more.appendChild(wrap);
   } else
     var white = R29.getElementsByClassName(more, 'whitespace')[0];
-  more.className = 'ellipsis';
-  more.style.position = 'absolute';
-  container.appendChild(more);
-  var placeholder = wrap.offsetWidth;
-  container.removeChild(more)
-  more.style.position = '';
 
   // measure basline (first character)
-  var offsetLeft = 0, offsetTop = 0, start = 0;
+  var offsetLeft = 0, offsetTop = 0
   for (var parent = container; parent; parent = parent.offsetParent) {
-    offsetLeft += parent.offsetLeft;
-    offsetTop += parent.offsetTop;
+    offsetLeft += parent.offsetLeft - (parent.scrollLeft || 0);
+    offsetTop += parent.offsetTop - (parent.scrollTop || 0);
   }
-  var collapse = 0, shift = 0, collapsed;
+  var collapse = 0, shift = 0, offset = 0, collapsed;
   //console.group(text.replace(/[\s\n]+/mg, '').substring(0, 40));
   // find a spot for ellipsis
-  for (var delta = max - start, n = start; delta >= 0.25;) {
-    // check middle of the text, then check in the middle 
+  for (var delta = max, n = 0; delta >= 0.25;) {
     delta /= 2;
     n += state ? delta : - delta;
     var now = Math.round(n);
@@ -85,10 +84,22 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
       // calculate its position. so we have to move cursor backwards
       if (diff < 0) {
         diff = null;
-        collapse += text.substring(0, position).match(self.boundaries)[0].length;
+        var match = text.substring(0, position).match(self.boundaries);
+        collapse += match && match[0].length || 1;
+        console.error('collapsin', collapse, text.substring(0, position), match)
         collapsed = range.startContainer;
       } else {
         // if there's not enough room for ellipsis element, move backwards
+        var parent = range.startContainer.parentNode;
+        if (shifted != parent) {
+          var shifted = parent; 
+          lineHeight = R29.getLineHeight(parent)
+          more.style.position = 'absolute';
+          parent.appendChild(more);
+          var placeholder = more.offsetWidth;
+          parent.removeChild(more)
+          more.style.position = '';
+        }
         if ((height - diff) <= lineHeight && (rectangle.right - offsetLeft) > width - placeholder) {
           diff = null;
           shift++;
@@ -104,14 +115,13 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
       }
     }
     state = diff < height
-    console.log(n, now, collapse, [diff, height], [text.substring(now), range.startContainer.textContent.substring(range.startOffset)], [rectangle.top, offsetTop], [diff, height, lineHeight])
+    //console.log(n, now, collapse, offsetTop, [diff, height], [text.substring(now), range.startContainer.textContent.substring(range.startOffset)], [rectangle.top, offsetTop], [diff, height, lineHeight])
 
   }
   now = now - shift - collapse//(collapse ? collapse - 1 : 0);
   //console.groupEnd(text.replace(/[\s\n]+/mg, '').substring(0, 40));
 
   // move cursor to omit unfinished words and punctuation
-  var offset = 0;
   if (now != max) {
     for (var chr; chr = text.charAt(now - offset);) {
       if (chr.match(self.boundaries)) {
@@ -134,7 +144,7 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   var node = range.endContainer;
 
   // if there's enough room, remove ellipsis
-  if (now == max) {
+  if (now == max -) {
     (self.stack[label] || (self.stack[label] = [])).push(more)
   // otherwise truncate text node, add ellipsis
   } else {
@@ -234,7 +244,7 @@ R29.setRange = function(element, position, range) {
 }
 
 // chars that may preceed ellipsis
-R29.ellipsis.boundaries = /\s|\m|^$|\n/;
+R29.ellipsis.boundaries = /(\s|^|\r?\n|\t)+$/;
 // chars that should not preceed ellipsis
 R29.ellipsis.ignore = /\(|:|,/;
 
