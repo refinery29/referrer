@@ -67,10 +67,8 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   // measure basline (first character)
   var box = container.getBoundingClientRect()
   var collapse = 0, shift = 0, offset = 0, collapsed;
-  //console.group(text.replace(/[\s\n]+/mg, '').substring(0, 40));
+  
   // find a spot for ellipsis
-  if (text.indexOf('too long') > -1)
-    debugger
   for (var delta = max, n = 0; delta >= 0.5;) {
     delta /= 2;
     n += state ? delta : - delta;
@@ -83,8 +81,7 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
       range = R29.setRange(container, position, range);
       var rectangle = range.getBoundingClientRect();
       diff = rectangle.bottom - paddingTop - box.top;
-      //console.error(delta, state, text.substring(0, position), rectangle.bottom, rectangle, offsetTop, [position, max], [diff, height])
-      
+
       // if cursor is within collapsed whitespace, browser doesnt 
       // calculate its position. so we have to move cursor backwards
       if (text.indexOf('Beyonce') > -1)
@@ -133,12 +130,8 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
       }
     }
     state = diff <= height
-    //console.log(n, now, collapse, offsetTop, [diff, height], [text.substring(now), range.startContainer.textContent.substring(range.startOffset)], [rectangle.top, offsetTop], [diff, height, lineHeight])
-
   }
   now = now - shift - collapse//(collapse ? collapse - 1 : 0);
-  //console.groupEnd(text.replace(/[\s\n]+/mg, '').substring(0, 40));
-  //offset = 1;
   if (now < max - 1 || text.charAt(now).match(self.boundaries))
   for (var chr; now - offset > -1;) {
     chr = text.charAt(now - offset)
@@ -165,7 +158,6 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   now = Math.max(0, now - offset);
   // put a cursor at the new spot
   var range = R29.setRange(container, now, range);
-  console.log(range.startOffset, [collapse, shift, offset, placeholder], [text, range.startContainer.textContent])
   var node = range.endContainer;
 
   // if there's enough room, remove ellipsis
