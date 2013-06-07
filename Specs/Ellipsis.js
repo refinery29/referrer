@@ -189,5 +189,51 @@ it ('should crop block elements with padding and custom ellipsis', function() {
     expect(container.offsetHeight).toBe(40 + 20);
   })
 
+  it ('should reuse ellipsis element', function() {
+    var container = document.createElement('div');
+    document.body.appendChild(container);
+    container.innerHTML = '  <p>  Maybe if I take all the Claritin  </p>  <p>  at once, these exciting new allergies  </p>  <p>  will be cured for good! That just makes goon snejdl wjl whkoz  <a href="#" class="ellipsis"> read </a> </p>  '
+    container.style.font = '10px/20px Arial';
+    container.style.width = '200px';
+    for (var all = container.getElementsByTagName('*'), el, i = 0; el = all[i++];) {
+      if (el.tagName == 'A')
+        continue;
+      el.style.font = 'inherit';
+      el.style.margin = 0;
+      el.style.padding = '0 0 20px 0'
+    }
+    R29.ellipsis(container, 1, null, 'zz', '... ');
+    getText(container, '    Maybe if I take all the Claritin...  read')
+    expect(container.offsetHeight).toBe(20 + 20);
+    R29.ellipsis(container, 6, null, 'zz', '... ');
+    getText(container, '    Maybe if I take all the Claritin      at once, these exciting new allergies      will be cured for good! That just makes goon snejdl wjl whkoz...  read ')
+    expect(container.offsetHeight).toBe(120 + 20);
+    R29.ellipsis(container, 2, null, 'zz', '... ');
+    getText(container, '    Maybe if I take all the Claritin...  read')
+    R29.ellipsis(container, 3, null, 'zz', '... ');
+    getText(container, '    Maybe if I take all the Claritin      at once, these exciting new allergies...  read')
+  })
 
+  it ('should not remove punctuation if there is enough room ', function() {
+    var container = document.createElement('div')
+    document.body.appendChild(container);
+    container.innerHTML = '  <p>  Hey guys where is everybody. </p> <p>I guess thats a bit too long, eh? Lets just make an alias. </p> <p> Copy and paste the line below on your terminal.  <a href="#" class="ellipsis"> read </a> </p> <b>  </b> '
+    container.style.font = '10px/20px Arial';
+    container.style.width = '200px';
+    for (var all = container.getElementsByTagName('*'), el, i = 0; el = all[i++];) {
+      if (el.tagName == 'A')
+        continue;
+      el.style.font = 'inherit';
+      el.style.margin = '0 0 20px 0';
+      el.style.padding = 0;
+
+    }
+    R29.ellipsis(container, 1, null, 'a', '... ');
+    getText(container, '    Hey guys where is everybody...  read')
+
+    R29.ellipsis(container, 10, null, 'a', '... ');
+    getText(container, '    Hey guys where is everybody...  read')
+
+    expect(R29.getElementsByClassName(container, 'ellipsis')[0].parentNode.tagName).toBe('P');
+  })
 })

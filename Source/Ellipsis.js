@@ -9,11 +9,6 @@ R29.getLineHeight = function(element) {
 }
 
 R29.ellipsis = function(container, limit, pixels, label, whitespace) {
-  var text = container.getAttribute('text-content');
-  if (!text) {
-    text = container.textContent;
-    container.setAttribute('text-content', text);
-  }
 
   // calculate element dimensions
   var paddingTop = parseFloat(R29.getComputedStyle(container, 'paddingTop', 'padding-top'));
@@ -27,8 +22,6 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     var height = R29.getLineHeight(container) * lines;
   }
   var width = container.offsetWidth - paddingLeft - paddingRight;
-  var max = text.length;
-  var now = 0;
   var state = true;
   if (!label) label = '…';
   if (!whitespace) whitespace = ' ';
@@ -44,9 +37,19 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     more = document.createElement('span');
     more.innerHTML = label;
     more.className = 'ellipsis';
+    more.setAttribute('built', '')
   } else {
     more.parentNode.removeChild(more);
+    if (more.getAttribute('built') == null)
+      more.setAttribute('reused', '')
   }
+  var text = container.getAttribute('text-content');
+  if (!text) {
+    text = container.textContent;
+    container.setAttribute('text-content', text);
+  }
+  var max = text.length;
+  var now = 0;
   var wrap = R29.getElementsByClassName(more, 'wrap')[0];
   if (!wrap) {
     var white = document.createElement('span');;
@@ -63,30 +66,47 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     var white = R29.getElementsByClassName(more, 'whitespace')[0];
 
   // measure basline (first character)
-  var offsetLeft = 0, offsetTop = 0
+  var offsetLeft = paddingLeft, offsetTop = paddingTop
   for (var parent = container; parent; parent = parent.offsetParent) {
-    offsetLeft += parent.offsetLeft - (parent.scrollLeft || 0);
-    offsetTop += parent.offsetTop - (parent.scrollTop || 0);
+    offsetLeft += parent.offsetLeft
+    offsetTop += parent.offsetTop
+    //if (parent.tagName != 'BODY') {
+      offsetLeft -= parent.scrollLeft;
+      offsetTop -= parent.scrollTop;
+    //}
   }
   var collapse = 0, shift = 0, offset = 0, collapsed;
   //console.group(text.replace(/[\s\n]+/mg, '').substring(0, 40));
   // find a spot for ellipsis
-  for (var delta = max, n = 0; delta >= 0.25;) {
+  for (var delta = max, n = 0; delta >= 0.5;) {
     delta /= 2;
     n += state ? delta : - delta;
     var now = Math.round(n);
     for (var diff = null; diff == null;) {
       var position = now - collapse - shift;
+      if (position < 0) {
+        break;
+      }
       range = R29.setRange(container, position, range);
       var rectangle = range.getBoundingClientRect(); 
-      diff = rectangle.top - offsetTop;
+      diff = rectangle.bottom - offsetTop;
+      //console.error(delta, state, text.substring(0, position), rectangle.bottom, rectangle, offsetTop, [position, max], [diff, height])
+      
       // if cursor is within collapsed whitespace, browser doesnt 
       // calculate its position. so we have to move cursor backwards
       if (diff < 0) {
         diff = null;
+        collapse++
+        if (text.indexOf('Quiet Affair') > -1)
+          debugger
         var match = text.substring(0, position).match(self.boundaries);
-        collapse += match && match[0].length || 1;
-        console.error('collapsin', collapse, text.substring(0, position), match)
+        if (!match || match[0].length) {
+          collapse++;
+        } else {
+          collapse += match[0].length
+        }
+        if (collapse > 1000)
+          debugger
         collapsed = range.startContainer;
       } else {
         // if there's not enough room for ellipsis element, move backwards
@@ -97,10 +117,17 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
           more.style.position = 'absolute';
           parent.appendChild(more);
           var placeholder = more.offsetWidth;
+          //if (!white.offsetWidth && whitespace == ' ')
+          //  placeholder += 5;
           parent.removeChild(more)
           more.style.position = '';
         }
-        if ((height - diff) <= lineHeight && (rectangle.right - offsetLeft) > width - placeholder) {
+        if (now == max) {
+          more.classList.add('final');
+        } else {
+          more.classList.remove('final');
+        }
+        if (now != max && ((height - diff) <= lineHeight && (rectangle.right - offsetLeft) > width - placeholder)) {
           diff = null;
           shift++;
         } else {
@@ -108,9 +135,9 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
             collapse = 0;
             collapsed = null;
           }
-          if (shift) {
+          //if (shift) {
             break;
-          }
+          //}
         }
       }
     }
@@ -120,31 +147,36 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
   }
   now = now - shift - collapse//(collapse ? collapse - 1 : 0);
   //console.groupEnd(text.replace(/[\s\n]+/mg, '').substring(0, 40));
-
-  // move cursor to omit unfinished words and punctuation
-  if (now != max) {
-    for (var chr; chr = text.charAt(now - offset);) {
-      if (chr.match(self.boundaries)) {
-        var bound = true;
-      } else if (!chr.match(self.ignore)) {
-        if (ignored || bound) {
-          offset--;
-          break;
-        }
-      } else {
-        var ignored = true;
-        bound = false;
+  //offset = 1;
+  for (var chr; now - offset > -1;) {
+    chr = text.charAt(now - offset)
+    if (chr.match(self.boundaries)) {
+      var bound = true;
+    } else if (!chr.match(self.ignore) || now == max) {
+      if (ignored || bound) {
+        offset--;
+        break;
       }
-      offset ++;
+    } else {
+      var ignored = true;
+      bound = false;
     }
-    now = Math.max(0, now - offset);
+    offset ++;
   }
+  if (now == max - 1) 
+    if (more.getAttribute('built') == null)
+      offset++;
+    else
+      offset--;
+  now = Math.max(0, now - offset);
   // put a cursor at the new spot
   var range = R29.setRange(container, now, range);
+  console.log(range.startOffset, [collapse, shift, offset, placeholder], [text, range.startContainer.textContent])
   var node = range.endContainer;
 
   // if there's enough room, remove ellipsis
-  if (now == max -) {
+  var match = text.substring(now).match(self.boundaries);
+  if (now + (match && match[0].length || 0) == max && more.getAttribute('built') != null) {
     (self.stack[label] || (self.stack[label] = [])).push(more)
   // otherwise truncate text node, add ellipsis
   } else {
@@ -246,6 +278,6 @@ R29.setRange = function(element, position, range) {
 // chars that may preceed ellipsis
 R29.ellipsis.boundaries = /(\s|^|\r?\n|\t)+$/;
 // chars that should not preceed ellipsis
-R29.ellipsis.ignore = /\(|:|,/;
+R29.ellipsis.ignore = /\(|:|,|\./;
 
 R29.ellipsis.stack = {};
