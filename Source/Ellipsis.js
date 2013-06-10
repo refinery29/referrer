@@ -84,8 +84,6 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
 
       // if cursor is within collapsed whitespace, browser doesnt 
       // calculate its position. so we have to move cursor backwards
-      if (text.indexOf('Beyonce') > -1)
-        debugger
       if (!rectangle.bottom) {
         diff = null;
         collapse++
@@ -148,8 +146,7 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     }
     offset ++;
   }
-  if (text.indexOf('Polish') > -1)
-    debugger
+
   if (now == max - 1) 
     if (!more.classList.contains('built'))
       offset++;
