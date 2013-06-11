@@ -80,10 +80,6 @@ Slideshow.prototype.attach = function() {
     //if (event.target.tagName == 'IMG')
       event.preventDefault();
   }
-  element.onclick = function(event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
 
   hammer.ondragstart = function(event) {
     cancelAnimationFrame(self.scrolling);
