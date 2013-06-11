@@ -84,6 +84,7 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
 
       // if cursor is within collapsed whitespace, browser doesnt 
       // calculate its position. so we have to move cursor backwards
+      //debugger
       if (!rectangle.bottom) {
         diff = null;
         collapse++
@@ -103,7 +104,18 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
           more.classList.remove('final');
         }
         if (shifted != parent) {
-          var shifted = parent; 
+          var shifted = parent;
+          for (var p = parent; p = p.parentNode;) {
+            var alignment = R29.getComputedStyle(p, 'textAlign', 'text-align');
+            if (alignment == 'center') {
+              var centered = true;
+              break;
+            } else if (p == container) {
+              if (centered)
+                centered = false;
+              break;
+            }
+          }
           lineHeight = R29.getLineHeight(parent)
           more.style.position = 'absolute';
           parent.appendChild(more);
@@ -113,21 +125,30 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
           parent.removeChild(more)
           more.style.position = '';
         }
-        if (now != max && ((height - diff) <= lineHeight && (rectangle.right - box.left - paddingLeft) > width - placeholder)) {
-          diff = null;
-          shift++;
-        } else {
-          if (collapse) {   // && collapsed != range.startContainer) {
-            collapse = 0;
-            collapsed = null;
+        if (height > diff) {
+          var space = box.right - rectangle.right - paddingRight;
+          console.log(space)
+          if (centered) {
+            space += space - paddingLeft - 10;
           }
-          //if (shift) {
-            break;
-          //}
+          if (now != max && (height - diff <= lineHeight) && (space < placeholder)) {
+            diff = null;
+            shift++;
+          } else {
+            if (collapse) {   // && collapsed != range.startContainer) {
+              collapse = 0;
+              collapsed = null;
+            }
+            //if (shift) {
+              break;
+            //}
+          }
         }
       }
     }
     state = diff <= height
+    if (!state && delta < 2)
+      delta = 2;
   }
   now = now - shift - collapse//(collapse ? collapse - 1 : 0);
   if (now < max - 1 || text.charAt(now).match(self.boundaries))
@@ -146,7 +167,6 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
     }
     offset ++;
   }
-
   if (now == max - 1) 
     if (!more.classList.contains('built'))
       offset++;

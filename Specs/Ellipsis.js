@@ -231,9 +231,33 @@ it ('should crop block elements with padding and custom ellipsis', function() {
     R29.ellipsis(container, 1, null, 'a', '... ');
     getText(container, '    Hey guys where is everybody...  read')
 
-    R29.ellipsis(container, 10, null, 'a', '... ');
-    getText(container, '    Hey guys where is everybody...  read')
+    //R29.ellipsis(container, 10, null, 'a', '... ');
+    //getText(container, '    Hey guys where is everybody...  read')
 
     expect(R29.getElementsByClassName(container, 'ellipsis')[0].parentNode.tagName).toBe('P');
+  })
+
+  it ('should support centered text', function() {
+    var container = document.createElement('div')
+    document.body.appendChild(container);
+    container.innerHTML = '  <p>  Hey guys where is everybody. </p> <p>I guessorrizirofkfkfkfkfkfkfkfkkjfr thatsaliciouscomrades a bit too long, eh? Lets just make an alias. </p> <p> Copy and paste the line below on your terminal.  <a href="#" class="ellipsis"> read </a> </p> <b>  </b> '
+    container.style.font = '10px/20px Arial';
+    container.style.width = '200px';
+    container.style.textAlign = 'center'
+    for (var all = container.getElementsByTagName('*'), el, i = 0; el = all[i++];) {
+      if (el.tagName == 'A')
+        continue;
+      el.style.font = 'inherit';
+      el.style.margin = '0 0 20px 0';
+      el.style.padding = 0;
+    }
+    R29.ellipsis(container, 1, null, 'a', '... ');
+    getText(container, '    Hey guys where is everybody...  read')
+    R29.ellipsis(container, 2, null, 'a', '... ');
+    getText(container, '    Hey guys where is everybody...  read')
+    R29.ellipsis(container, 3, null, 'a', '... ');
+    getText(container, '    Hey guys where is everybody.  I guessorrizirofkfkfkfkfkfkfkfkkjfr...  read')
+    R29.ellipsis(container, 4, null, 'a', '... ');
+    getText(container, '    Hey guys where is everybody.  I guessorrizirofkfkfkfkfkfkfkfkkjfr thatsaliciouscomrades a bit too long...  read')
   })
 })
