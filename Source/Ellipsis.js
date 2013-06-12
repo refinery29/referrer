@@ -110,9 +110,6 @@ R29.ellipsis = function(container, limit, pixels, label, whitespace) {
         else
           offset--;
 
-      if (text.indexOf('Beyonce') > -1)
-        console.error(position, diff, height, rectangle.top, box.top)
-
       if (height > diff - 5) {
         // if there's not enough room for ellipsis element, move backwards
         var parent = range.startContainer.parentNode;
