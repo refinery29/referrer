@@ -12,9 +12,11 @@ describe('R29.ellipsis', function() {
     R29.ellipsis(container, 1);
     getText(container, 'Maybe if I take all the Claritin at once …')
     R29.ellipsis(container, 2);
-    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured …')
+    //getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured …')
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be …')
     R29.ellipsis(container, 3);
-    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl …')
+    //getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl …')
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl …')
     R29.ellipsis(container, 4);
     getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
   })
@@ -32,9 +34,9 @@ describe('R29.ellipsis', function() {
     R29.ellipsis(container, 1);
     getText(container, 'Maybe if I take all the Claritin at once …')
     R29.ellipsis(container, 2);
-    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured …')
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be …')
     R29.ellipsis(container, 3);
-    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl …')
+    getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl …')
     R29.ellipsis(container, 4);
     getText(container, 'Maybe if I take all the Claritin at once, these exciting new allergies will be cured for good! That just makes goon snejdl wjl whkoz')
   })
@@ -211,7 +213,7 @@ it ('should crop block elements with padding and custom ellipsis', function() {
     R29.ellipsis(container, 2, null, 'zz', '... ');
     getText(container, '    Maybe if I take all the Claritin...  read')
     R29.ellipsis(container, 3, null, 'zz', '... ');
-    getText(container, '    Maybe if I take all the Claritin      at once, these exciting new allergies...  read')
+    getText(container, '    Maybe if I take all the Claritin      at once, these exciting new...  read')
   })
 
   it ('should not remove punctuation if there is enough room ', function() {
