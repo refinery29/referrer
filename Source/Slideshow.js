@@ -587,7 +587,7 @@ Slideshow.prototype.onClick = function(e, gesture) {
           }, 500)
         }
       var li = el;
-      if (!picture && !link && !selected && !img && !panel) {
+      if (!picture && !link && !img && !panel) {
         var x = e.pageX || e.clientX;
         var width = window.innerWidth;
         if (x > width * 0.66 || x < width * 0.33)
