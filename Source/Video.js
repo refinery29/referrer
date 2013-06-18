@@ -52,7 +52,7 @@ R29.Video.prototype.set = function(id) {
   this.player.loadVideoByID(id)
 };
 R29.Video.prototype.start = function() {
-  if (this.player)
+  if (this.player && typeof this.player.start !== 'undefined')
     this.player.start();
 };
 R29.Video.prototype.stop = function() {
